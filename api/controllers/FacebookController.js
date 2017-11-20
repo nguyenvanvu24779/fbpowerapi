@@ -10,6 +10,8 @@ const https = require('https');
 var querystring = require('querystring');
 const { spawn } = require('child_process');
 const { exec } = require('child_process');
+var FB = require('fb');
+FB.options({version: 'v2.11'});
 
 
 
@@ -21,7 +23,7 @@ module.exports = {
 	    var xs =  req.query.xs;
 	    var fr =  req.query.fr;
 	    var datr =  req.query.datr;
-	    var __dyn = req.query.jazoest;
+	    var __dyn = req.query.__dyn;
 	    var fb_dtsg = req.query.fb_dtsg;
 	    var jazoest = req.query.jazoest;
 	   
@@ -243,8 +245,74 @@ module.exports = {
     request.end();
    
     
+  },
+  
+  getStreamVideo : function(req, res){
+    var streamVideoId = req.query.streamVideoId;
+    var c_user =  req.query.c_user;
+    var xs =  req.query.xs;
+    var fr =  req.query.fr;
+    var datr =  req.query.datr;
+    var __dyn = req.query.__dyn;
+    
+    var path = "/video/liveviewcount/?video_id=" + streamVideoId + 
+    "&source=permalink&player_origin=permalink&unmuted=true&dpr=1&__user="+ c_user + 
+    "&__a=1&__dyn=" + __dyn +
+    "&__req=1f&__be=1&__pc=PHASED%3ADEFAULT&__rev=3461582&__spin_r=3461582&__spin_b=trunk&__spin_t=1510864180"
+    
+    var options = { 
+            hostname: 'www.facebook.com',
+            path: path,
+            method: 'GET',
+            headers: {'Cookie': 'c_user=' + c_user + ";xs=" + xs + ";fr=" + fr + ";datr=" + datr,
+                      'Content-Type': 'application/x-javascript; charset=utf-8',
+                      'user-agent' : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
+            }
+    };
+    
+     var request =  https.request(options, (resp) => {
+              var data = '';
+             
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                data += chunk;
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                console.log('end' + data);
+                var regexp = /span/g;
+                var match = regexp.exec(data);
+                if(match){
+                     return res.json({ live : 'true' });
+                } else return res.json({ live : 'false' });
+                
+              });
+         
+        }).on("error", (err) => {
+          console.log("Error: " + err.message);
+        });
+      
+      request.end();
+      //return res.json({ message : 'ok' });
+    
+  },
+  
+  getGroupShares: function(req, res){
+    var videoId = req.query.videoId;
+    var token = "EAACEdEose0cBAItiUkRhKaYL9laDzjHnDfapKr1V1gWj0G6XCU829f8C8asd5ukcOxxZAWVbZBAVrYiKheAzEIBOQCUC9sddHOFs4tueJ0F4zCgsPP1ZBP0Ybx1TjLLr7pkWwnGjafZCryeJGrd5oEsDzHl2qvdVFHsq5ZC2veOMaekiKWORcWuwhxu3k1LFq0DW1LquLXgZDZD";
+    FB.setAccessToken(token);
+    
+    FB.api(
+    "/" + videoId + "/sharedposts",
+    function (response) {
+          if (response && !response.error) {
+             return res.json({ data : response });
+          } else return res.json({ message : "fail" });
+        }
+    );
+    
+    
   }
-  
-  
 };
 
