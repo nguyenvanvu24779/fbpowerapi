@@ -97,7 +97,7 @@ module.exports = {
                 } else console.log(response.error);
             });
         }
-        FB.setAccessToken("EAACEdEose0cBAGlcPDuhZBOD5gpZAR3RGn2jdBuje20imzgAlWQzhBnxKhZB4hg5SrIZAIwrRZAnZAhdXZBDaYBhI3aTwkwgKBOP8bWP2fTsI9XEtKDlL9D0tDZBlB6szEpdt4WHwiHH7KANNc3CBKIpZC9u10ze5NBiUW16CJdDvuXWUJD6wYk1xmhClWojUAQwAPZCQDfY7KNwZDZD");
+        FB.setAccessToken("EAAK5kRABfo0BALuKJbFDXDBZAZA1EUCp7eLtiHu3xYrQyxDZAFQSB1nnZBHNZBPnxz8t95lMPoje8sclMAi2JRZC6G0BRtzZAMjvyaYKqAbHZC14JxJMZCebZCm3y5LglgDZBH4Tnz0ZBJ50qAf8IYI6j3ZC9n1nKU12HUwKe2OjomOHqI3Jd6ZCtzsuFWdyRnOi2VGLZByMTBjv9wLTLByol4vTxvO30rmskNSkpR5dH6Jisu21gZDZD");
         async.forEachOf(arrVideoIds, (value, key, callback) => {
             fetch(value, "");
             callback();
