@@ -12,7 +12,7 @@ module.exports = {
     addMulti : function(req, res){
         var groupIds = req.query.groupIds;
         var arrGroupId = groupIds.split("|"); 
-        var token = "EAACEdEose0cBAIZAIQcyZCQ9ZAyyawW0rlZBwxfvX7UALFzoyu6ggZCVZBJEpgsbsZAZCBr63aG7Xsk5sEGVBSZAJ7qkWOX4OZCl41BTvqGM6QOoZBdYHUEZAm65egTqXXJdeKct1c3lHH3ZBE0AfUJpno9Cq89TmrjLXDZCqZA0LbqzpdiE8Xifwj7HJPPTy7RLSEEuKkZD";
+        var token = "EAACEdEose0cBAMx2BuKufddRI1nzQnryuqKLQPpZAuIrIwodaTYZB0cqSRV1XEkm0ivYzdbgw58iKx6RfmHXyi6QIznzWlBZBEStZCePI6ssAgifZAGLac6dRbRq3KZALFEBeciaZAKQuZAV8sSxGrjGUI3o56480vdH4rSauzHguZAkZBMA3sZA5fPvgVVJG5zkj9EvKO3ypAB6wZDZD";
         FB.setAccessToken(token);
         
         async.forEachOf(arrGroupId, (value, key, callback) => {
@@ -97,7 +97,7 @@ module.exports = {
                 } else console.log(response.error);
             });
         }
-        FB.setAccessToken("EAAK5kRABfo0BALuKJbFDXDBZAZA1EUCp7eLtiHu3xYrQyxDZAFQSB1nnZBHNZBPnxz8t95lMPoje8sclMAi2JRZC6G0BRtzZAMjvyaYKqAbHZC14JxJMZCebZCm3y5LglgDZBH4Tnz0ZBJ50qAf8IYI6j3ZC9n1nKU12HUwKe2OjomOHqI3Jd6ZCtzsuFWdyRnOi2VGLZByMTBjv9wLTLByol4vTxvO30rmskNSkpR5dH6Jisu21gZDZD");
+        FB.setAccessToken("EAACEdEose0cBAMx2BuKufddRI1nzQnryuqKLQPpZAuIrIwodaTYZB0cqSRV1XEkm0ivYzdbgw58iKx6RfmHXyi6QIznzWlBZBEStZCePI6ssAgifZAGLac6dRbRq3KZALFEBeciaZAKQuZAV8sSxGrjGUI3o56480vdH4rSauzHguZAkZBMA3sZA5fPvgVVJG5zkj9EvKO3ypAB6wZDZD");
         async.forEachOf(arrVideoIds, (value, key, callback) => {
             fetch(value, "");
             callback();
