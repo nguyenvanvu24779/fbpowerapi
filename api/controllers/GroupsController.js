@@ -7,57 +7,72 @@
 var async = require("async");
 var FB = require('fb');
 FB.options({version: 'v2.11'});
-
 module.exports = {
     addMulti : function(req, res){
         var groupIds = req.query.groupIds;
         var arrGroupId = groupIds.split("|"); 
-        var token = "EAACEdEose0cBAMx2BuKufddRI1nzQnryuqKLQPpZAuIrIwodaTYZB0cqSRV1XEkm0ivYzdbgw58iKx6RfmHXyi6QIznzWlBZBEStZCePI6ssAgifZAGLac6dRbRq3KZALFEBeciaZAKQuZAV8sSxGrjGUI3o56480vdH4rSauzHguZAkZBMA3sZA5fPvgVVJG5zkj9EvKO3ypAB6wZDZD";
-        FB.setAccessToken(token);
-        
-        async.forEachOf(arrGroupId, (value, key, callback) => {
-            FB.api(
-                "/" + value, 
-                function (response) {
-                    //console.log(response);
-                    var group = {};
-                    if(response &&  !response.error) {
-                        if(response.name)
-                            group.name =  response.name;
-                        else {
-                            FB.api("/" + response.id , function(response1){
-                                response = response1;
-                            })
-                        }
+        var token = "";
+         async.waterfall([
+            function(cb){
+                Settings.findOne({
+                    key : 'access_token'
+                  }).exec(function (err, finn){
+                    if (!err && finn ) {
+                        token = finn.value;
                     }
-                    if (response && !response.error) {
-                        if(response.privacy) group.privacy =  response.privacy;
-                        if(response.id) group.groupId =  response.id;
-                        Groups.create(group).exec(function createCB(err1, created){
-                            if(err1)
-                                res.write(value + ", err: "  + err1);
-                            else res.write(value  + ", created: " + JSON.stringify(created) + "\n");
-                            callback();
-                        });
-                    } else{
-                        res.write(value + ", response.error\n" );
-                        callback();
-                    }
-                   
-                }
-            )
-        }, err => {
-            if (err) console.error(err.message);
-            res.end();
-        });
+                    cb()
+                });
+            },
+            function(cb){
+                FB.setAccessToken(token);
+                async.forEachOf(arrGroupId, (value, key, callback) => {
+                        FB.api(
+                            "/" + value, 
+                            function (response) {
+                                //console.log(response);
+                                var group = {};
+                                if(response &&  !response.error) {
+                                    if(response.name)
+                                        group.name =  response.name;
+                                    else {
+                                        FB.api("/" + response.id , function(response1){
+                                            response = response1;
+                                        })
+                                    }
+                                }
+                                if (response && !response.error) {
+                                    if(response.privacy) group.privacy =  response.privacy;
+                                    if(response.id) group.groupId =  response.id;
+                                    Groups.create(group).exec(function createCB(err1, created){
+                                        if(err1)
+                                            res.write(value + ", err: "  + err1);
+                                        else res.write(value  + ", created: " + JSON.stringify(created) + "\n");
+                                        callback();
+                                    });
+                                } else{
+                                    res.write(value + ", response.error\n" );
+                                    callback();
+                                }
+                               
+                            }
+                        )
+                }, err => {
+                    if (err) console.error(err.message);
+                    res.end();
+                });
+                cb()
+            }
+        ],function(error,success ){
+            
+        }); 
         
-     
         
     },
     
     addGroupsByVideoId : function (req, res){
         var videoIds = req.query.videoIds;
         var arrVideoIds = videoIds.split("|");
+         sails.sockets.broadcast('root', {msg : 'test group'  });
         var fetch = function (value, after ) { 
             var url = ""; 
             if(after != "")  
@@ -94,20 +109,40 @@ module.exports = {
                   
                     if(response.paging && response.paging.next) 
                         fetch(value, response.paging.cursors.after);
-                } else console.log(response.error);
+                    } else {
+                        sails.sockets.broadcast('root', {msg : 'error: ' + JSON.stringify(response.error) });
+                        console.log(response.error);
+                    }
             });
         }
-        FB.setAccessToken("EAACEdEose0cBAMx2BuKufddRI1nzQnryuqKLQPpZAuIrIwodaTYZB0cqSRV1XEkm0ivYzdbgw58iKx6RfmHXyi6QIznzWlBZBEStZCePI6ssAgifZAGLac6dRbRq3KZALFEBeciaZAKQuZAV8sSxGrjGUI3o56480vdH4rSauzHguZAkZBMA3sZA5fPvgVVJG5zkj9EvKO3ypAB6wZDZD");
-        async.forEachOf(arrVideoIds, (value, key, callback) => {
-            fetch(value, "");
-            callback();
-        }, err => {
-            res.json({message : 'ok'});
-        });
         
+        var token = '';
+        
+        async.waterfall([
+            function(cb){
+                Settings.findOne({
+                    key : 'access_token'
+                  }).exec(function (err, finn){
+                    if (!err && finn ) {
+                        token = finn.value;
+                    }
+                    cb()
+                });
+            },
+            function(cb){
+                FB.setAccessToken(token); 
+                async.forEachOf(arrVideoIds, (value, key, callback) => {
+                    fetch(value, "");
+                    callback();
+                }, err => {
+                    res.json({message : 'ok'});
+                });
+                cb();
+             },
+             
+        ], function (error, success) {
+          
+        });
     },
-    
-    
-	
 };
 

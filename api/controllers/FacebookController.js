@@ -214,8 +214,6 @@ module.exports = {
      var data = '';
     
     var request =  https.request(options, (resp) => {
-             
-             
               // A chunk of data has been recieved.
               resp.on('data', (chunk) => {
                 data += chunk;
@@ -300,18 +298,57 @@ module.exports = {
   
   getGroupShares: function(req, res){
     var videoId = req.query.videoId;
-    var token = "EAACEdEose0cBAItiUkRhKaYL9laDzjHnDfapKr1V1gWj0G6XCU829f8C8asd5ukcOxxZAWVbZBAVrYiKheAzEIBOQCUC9sddHOFs4tueJ0F4zCgsPP1ZBP0Ybx1TjLLr7pkWwnGjafZCryeJGrd5oEsDzHl2qvdVFHsq5ZC2veOMaekiKWORcWuwhxu3k1LFq0DW1LquLXgZDZD";
-    FB.setAccessToken(token);
+    var token = '';
+    async.waterfall([
+      function(callback){
+         Settings.findOne({
+            key : 'access_token'
+          }).exec(function (err, finn){
+            if (!err && finn ) {
+                token = finn.value;
+            }
+            callback()
+        });
+      },
+      function(callback){
+         FB.setAccessToken(token);
+          FB.api(
+          "/" + videoId + "/sharedposts",
+          function (response) {
+                if (response && !response.error) {
+                   return res.json({ data : response });
+                } else return res.json({ message : "fail" });
+              }
+          );
+      }
+    ], function (error, success) {
+      
+    });
     
-    FB.api(
-    "/" + videoId + "/sharedposts",
-    function (response) {
-          if (response && !response.error) {
-             return res.json({ data : response });
-          } else return res.json({ message : "fail" });
-        }
-    );
     
+    
+  },
+  
+  testFunc : function(req, res){
+    var token = '';
+    async.waterfall([
+      function(callback){
+         Settings.findOne({
+            key : 'access_token'
+          }).exec(function (err, finn){
+            if (!err && finn ) {
+                token = finn.value;
+               console.log('[getGroupShares] token:' + token);
+              
+            }
+            callback()
+        });
+      }
+    ], function (error, success) {
+         res.json(token);
+    });
+   
+   
     
   }
 };
