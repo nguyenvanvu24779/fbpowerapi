@@ -13,7 +13,6 @@ module.exports = {
         // Have the socket which made the request join the "funSockets" room.
         sails.sockets.join(req, 'root');
         sails.sockets.broadcast('root', {msg : 'hi there!'});
-        sails.sockets.broadcast('root', {msg : 'hi there!'});
         return res.json({
           message: 'ok'
         });
