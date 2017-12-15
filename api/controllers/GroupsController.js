@@ -68,6 +68,7 @@ module.exports = {
         var groupIds = req.query.groupIds;
         var arrGroupId = groupIds.split("|"); 
         var token = "";
+        var user = {};
          async.waterfall([
             function(cb){
                 Settings.findOne({
@@ -78,6 +79,16 @@ module.exports = {
                     }
                     cb()
                 });
+            },
+            function(cb){
+                Settings.findOne({
+                    key : 'account_global'
+                  }).exec(function (err, finn){
+                    if (!err && finn ) {
+                        user = JSON.parse(finn.value);
+                    }
+                    cb()
+                });  
             },
             function(cb){
                 FB.setAccessToken(token);
@@ -99,12 +110,27 @@ module.exports = {
                                 if (response && !response.error) {
                                     if(response.privacy) group.privacy =  response.privacy;
                                     if(response.id) group.groupId =  response.id;
-                                    Groups.create(group).exec(function createCB(err1, created){
-                                        if(err1)
-                                            res.write(value + ", err: "  + err1);
-                                        else res.write(value  + ", created: " + JSON.stringify(created) + "\n");
-                                        callback();
-                                    });
+                                    if(response.name) group.name = response.name;
+                                    group.question = [];
+                                    requestWithEncoding(group.groupId, user, function(err, data) {
+                                        if (err)
+                                            console.log(err);
+                                        else{ 
+                                            //console.log(data);
+                                            if(data.includes("custom_questions")){
+                                              data  = data.replace("for (;;);", "");
+                                              var obj = JSON.parse(data);
+                                              console.log(obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g));
+                                              group.question = obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g);
+                                            }
+                                            Groups.create(group).exec(function createCB(err1, created){
+                                                    if(err1)
+                                                        console.log(err1)
+                                                    else  sails.sockets.broadcast('root', {msg : 'add group: ' +  group.name  });
+                                            });
+                                            
+                                        }
+                                    })
                                 } else{
                                     res.write(value + ", response.error\n" );
                                     callback();
@@ -128,12 +154,12 @@ module.exports = {
     addGroupsByVideoId : function (req, res){
         var videoIds = req.query.videoIds;
         var arrVideoIds = videoIds.split("|");
-         sails.sockets.broadcast('root', {msg : 'test group'  });
+        var user = {}
         var fetch = function (value, after ) { 
             var url = ""; 
             if(after != "")  
-                url = "/" + value + "/sharedposts?fields=to{profile_type,name}&limit=2000" + "&after=" + after;
-            else url =  "/" + value + "/sharedposts?fields=to{profile_type,name}&limit=2000";
+                url = "/" + value + "/sharedposts?fields=to{profile_type,name}&limit=1000" + "&after=" + after;
+            else url =  "/" + value + "/sharedposts?fields=to{profile_type,name}&limit=1000";
             
             console.log(url);
             
@@ -152,20 +178,8 @@ module.exports = {
                                     if(response.privacy) group.privacy =  response.privacy;
                                     if(response.id) group.groupId =  response.id;
                                     group.question = [];
-                                    var user =  {
-                                        "username": "huthamcauquan1@gmail.com",
-                                        "password": "HoangVuong3031993",
-                                        "__dyn": "7AgNe-4amaxx2u6Xolg9pE9XG8GEW8xdLFwxx-6EeAq2i5U4e1Fx-K9wSwIK7Hwlk14DBwJx62i2O7EO2S1Dxa2m4o9Ef8oC-UeovwMwQwiVUtwVwpVHxx0Mw8yfwNx-8xuazodo8oydzEjG488o4e6aUpUGq9wyQF8uhA3C",
-                                        "__spin_r": "3499132",
-                                        "__spin_t": "1512440199",
-                                        "__user": "100017390281088",
-                                        "fb_dtsg": "AQGakyIMzXZ5:AQFsg9IdtN5I",
-                                        "jazoest": "2658171971071217377122889053586581701151035773100116785373",
-                                        "cookie": "datr=ggEmWosPoZCPWgHR7PbtUHmS;fr=0nelcIYrQ3I6RzXGe.AWULbnegIzcJFKX3F0kZMRckUiA.BaJgGC.A4.AAA.0.0.BaJgGG.AWVwDphk;xs=13:vh8PAAUc-0bhhQ:2:1512440198:-1:-1;c_user=100017390281088",
-                                        "createdAt": "2017-12-05T02:16:43.184Z",
-                                        "updatedAt": "2017-12-05T02:16:43.184Z",
-                                        "id": "5a26018b475e94bc11f73429"
-                                    }
+      
+                                       
                                     requestWithEncoding(group.groupId, user, function(err, data) {
                                         if (err)
                                             console.log(err);
@@ -173,8 +187,8 @@ module.exports = {
                                             if(data.includes("custom_questions")){
                                               data  = data.replace("for (;;);", "");
                                               var obj = JSON.parse(data);
-                                              console.log(obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g));
-                                              group.question = obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g);
+                                              if(obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g));
+                                                group.question = obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g);
                                             }
                                             Groups.create(group).exec(function createCB(err1, created){
                                                     if(err1)
@@ -214,6 +228,16 @@ module.exports = {
                     }
                     cb()
                 });
+            },
+            function(cb){
+                Settings.findOne({
+                    key : 'account_global'
+                  }).exec(function (err, finn){
+                    if (!err && finn ) {
+                        user = JSON.parse(finn.value);
+                    }
+                    cb()
+                });  
             },
             function(cb){
                 FB.setAccessToken(token); 
