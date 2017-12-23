@@ -120,21 +120,23 @@ module.exports = {
                                             if(data.includes("custom_questions")){
                                               data  = data.replace("for (;;);", "");
                                               var obj = JSON.parse(data);
-                                              console.log(obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g));
-                                              group.question = obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g);
+                                              if(obj.jsmods.markup[1][1].__html.match(/<span><strong>(.*?)<\/strong><\/span>/g));
+                                                group.question = obj.jsmods.markup[1][1].__html.match(/<span><strong>(.*?)<\/strong><\/span>/g);
                                             }
                                             Groups.create(group).exec(function createCB(err1, created){
-                                                    if(err1)
+                                                    if(err1){
                                                         console.log(err1)
+                                                         sails.sockets.broadcast('root', {msg : 'error: group exists'});
+                                                    }
                                                     else  sails.sockets.broadcast('root', {msg : 'add group: ' +  group.name  });
                                             });
                                             
                                         }
                                     })
                                 } else{
-                                    res.write(value + ", response.error\n" );
-                                    callback();
+                                    res.write(value + ", response.error\n" )
                                 }
+                                callback();
                                
                             }
                         )
@@ -187,8 +189,8 @@ module.exports = {
                                             if(data.includes("custom_questions")){
                                               data  = data.replace("for (;;);", "");
                                               var obj = JSON.parse(data);
-                                              if(obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g));
-                                                group.question = obj.jsmods.markup[1][1].__html.match(/<strong>(.*?)<\/strong>/g);
+                                              if(obj.jsmods.markup[1][1].__html.match(/<span><strong>(.*?)<\/strong><\/span>/g));
+                                                group.question = obj.jsmods.markup[1][1].__html.match(/<span><strong>(.*?)<\/strong><\/span>/g);
                                             }
                                             Groups.create(group).exec(function createCB(err1, created){
                                                     if(err1)
