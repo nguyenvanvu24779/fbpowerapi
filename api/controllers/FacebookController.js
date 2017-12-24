@@ -69,7 +69,7 @@ module.exports = {
             method: 'POST',
             headers: {'Cookie': 'c_user=' + c_user + ";xs=" + xs + ";fr=" + fr + ";datr=" + datr,
                       'Content-Type': 'application/x-www-form-urlencoded',
-                      'user-agent' : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
+                      'user-agent' : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36"
             }
         };
 	    var request =  https.request(options, (resp) => {

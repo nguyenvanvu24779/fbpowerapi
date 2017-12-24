@@ -4,9 +4,10 @@ var system = require('system');
 var args = system.args;
 var execFile = process.execFile
 var page = require('webpage').create();
+
+var urlApi = 'http://45.117.169.77:1337/';
 page.settings.userAgent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36';
 page.clearCookies();
-
 
 if (args.length === 1) {
   console.log('Try to pass some arguments when invoking this script!');
@@ -23,7 +24,7 @@ page.onResourceRequested = function(requestData, networkRequest) {
 			for(var i in cookies) {
 				cookieStr+= ';' + cookies[i].name + '=' + cookies[i].value;
 			}
-			execFile("curl", ["", "http://45.117.171.237:1337/AccountsFB/create?" + 'username=' + args[1] + '&password=' + args[2] + '&cookie=' + cookieStr   + '&hashtag=' + args[3]], null, function (err, stdout, stderr) {
+			execFile("curl", ["", urlApi +  "AccountsFB/create?" + 'username=' + args[1] + '&password=' + args[2] + '&cookie=' + cookieStr   + '&hashtag=' + args[3]], null, function (err, stdout, stderr) {
 				console.log("execFileSTDOUT:", JSON.stringify(stdout))
 				console.log("execFileSTDERR:", JSON.stringify(stderr))
 		 		phantom.exit();
@@ -64,7 +65,7 @@ page.onResourceRequested = function(requestData, networkRequest) {
 			phantom.exit()
 		}
 		console.log('cookie : ' + cookieStr);
-		execFile("curl", ["", "http://45.117.171.237:1337/AccountsFB/create?" + urlParam], null, function (err, stdout, stderr) {
+		execFile("curl", ["",  urlApi + "AccountsFB/create?" + urlParam], null, function (err, stdout, stderr) {
 			console.log("execFileSTDOUT:", JSON.stringify(stdout))
 			console.log("execFileSTDERR:", JSON.stringify(stderr))
 		 	phantom.exit();
