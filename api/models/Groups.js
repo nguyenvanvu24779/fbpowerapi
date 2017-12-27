@@ -10,21 +10,11 @@ FB.options({version: 'v2.11'});
 module.exports = {
 
   attributes: {
+    groupId: {
+      type: 'string',
+      unique: true
+    }
 
-  },
-  // Lifecycle Callbacks
-  beforeCreate: function (values, cb) {
-    var groupId = values.groupId;
-    Groups.findOne({
-      groupId: values.groupId
-    }).exec(function (err, finn){
-      if (err) {
-        return cb(err);
-      }
-      if (!finn) {
-        cb();
-      } else cb("group exists")
-    });
   },
 };
 

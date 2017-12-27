@@ -2,6 +2,7 @@ const https = require('https');
 var async = require("async");
 
 var Join2Group =  function(account, groupId) {
+    console.log('[Join2Group] account: ' + account.username )
     var cookie = account.cookie;
     var params = "ref=group_jump_header"
     +"&group_id=" + groupId
@@ -45,7 +46,7 @@ var Join2Group =  function(account, groupId) {
 }
 
 var Join2GroupAnswer = function (account, groupId, question, answers){
-    //console.log('[Join2GroupAnswer]')
+    console.log('[Join2GroupAnswer]')
     var cookie = account.cookie; 
     var params = "fb_dtsg=" + account.fb_dtsg;
     
@@ -78,7 +79,7 @@ var Join2GroupAnswer = function (account, groupId, question, answers){
                           'user-agent' : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36"
                 }
     };
-  //  console.log('[Join2GroupAnswer] options:', options )
+   // console.log('[Join2GroupAnswer] options:', options )
     var request =  https.request(options, (resp) => {
           var data = '';
          
@@ -95,13 +96,14 @@ var Join2GroupAnswer = function (account, groupId, question, answers){
     }).on("error", (err) => {
       console.log("Error: " + err.message);
     });
-  //  console.log('[Join2GroupAnswer] params', params );
+    // console.log('[Join2GroupAnswer] params', params );
     request.write(encodeURI(params));
     request.end();
     
 } 
 
 var JoinAccounts2Groups = function(){
+    console.log('[JoinAccounts2Groups]')
     var groups = [];
     async.waterfall([
         function(cb){
@@ -123,12 +125,16 @@ var JoinAccounts2Groups = function(){
                     for (var i = 0; i < groups.length; i++) {
                         var group = groups[i];
                         
+                       // console.log('account: ', account);
+                        //console.log('group: ', group);
+                        
                         if(account.groups && account.groups.length > 0){
                             var findAcc =  account.groups.find(function(ele){
                                 return ele == group.groupId;
                             })
                             if(findAcc != undefined)
-                                return callback('joined');
+                               continue;
+                               // return callback('joined');
                         }
                         
                         if(account.groupsRequest && account.groupsRequest.length > 0){
@@ -136,11 +142,12 @@ var JoinAccounts2Groups = function(){
                                 return ele == group.groupId;
                             })
                             if(findAcc != undefined)
-                                return callback('requested');
+                               continue;
+                               // return callback('requested');
                         }
                         if(group.question &&  group.question.length > 0){
-                            if(group.answer == undefined) return callback('answer');
-                            if(group.answer &&  group.answer.length == 0) return callback('answer');
+                            if(group.answer == undefined) continue;//return callback('answer');
+                            if(group.answer &&  group.answer.length == 0) continue;//eturn callback('answer');
                         } 
                             
                         
@@ -154,6 +161,7 @@ var JoinAccounts2Groups = function(){
                     }
                     callback();
                 }, err => {
+                    if(err) console.log(err)
                     cb();
                 });
             }).catch(function(err){
@@ -179,7 +187,7 @@ module.exports = function(agenda) {
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 120 minutes',
+        frequency: 'every 60 minutes',
 
         // Jobs options
         //options: {

@@ -8,21 +8,10 @@
 module.exports = {
 
   attributes: {
-
-  },
-   // Lifecycle Callbacks
-  beforeCreate: function (values, cb) {
-    var username = values.username;
-    AccountsFB.findOne({
-      username: values.username
-    }).exec(function (err, finn){
-      if (err) {
-        return cb(err);
-      }
-      if (!finn) {
-        cb();
-      } else cb("AccountsFB exists")
-    });
+     username: {
+      type: 'string',
+      unique: true
+    }
   },
 };
 

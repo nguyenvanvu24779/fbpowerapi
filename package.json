@@ -22,6 +22,7 @@
     "grunt-sync": "0.5.2",
     "iltorb": "^2.0.3",
     "include-all": "^1.0.0",
+    "md5": "^2.2.1",
     "query-string": "^5.0.1",
     "querystring": "^0.2.0",
     "rc": "1.0.1",
