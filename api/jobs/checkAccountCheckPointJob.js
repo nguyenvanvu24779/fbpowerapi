@@ -58,24 +58,28 @@ var requestWithEncoding = function(groupsId, user, callback) {
 
 var checkAccountCheckPointJob = function(){
     AccountsFB.find().then(function(accounts) {
+        //console.log(accounts)
         async.eachOfSeries(accounts, (item, key, callback) => {
             var account = item;
             if(account.__user) 
                 requestWithEncoding('748487905348786', account, function(err, data){
                    if(err) return console.log(err);
-                   console.log('[checkAccountCheckPointJob] account: , ', account.username);
+                   console.log('[checkAccountCheckPointJob] account: ', account.username);
                    if(data.includes('checkpoint') && data.includes('ServerRedirect')){
                         console.log('checkpoint account');
-                        AccountsFB.update({__user:  account.__user},{ status : 'checkpoint' }).exec(function afterwards(err, updated){});
-                       
+                        AccountsFB.update({__user:  account.__user},{ status : 'checkpoint' }).exec(function afterwards(err, updated){
+                             callback();
+                        });
+                      
                    }else {
                         console.log('account ok');
-                        callback();
+                         callback();
                    }
+                  
                   
                 })
             else {
-                callback('fail');
+                callback();
                  AccountsFB.update({__user:  account.__user},{ status : 'fail' }).exec(function afterwards(err, updated){});
             }
             

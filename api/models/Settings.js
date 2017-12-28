@@ -8,7 +8,10 @@
 module.exports = {
 
   attributes: {
-
+    key: {
+      type: 'string',
+      unique: true
+    }
   }
 };
 

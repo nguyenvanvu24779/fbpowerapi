@@ -7,11 +7,154 @@
 var process = require("child_process");
 var execFile = process.execFile
 const https = require('https');
+const http = require('http');
 var querystring = require('querystring');
 const { spawn } = require('child_process');
 const { exec } = require('child_process');
+const decompress = require('iltorb').decompress;
+var async = require("async");
 var FB = require('fb');
 FB.options({version: 'v2.11'});
+
+
+function getStrings(test_str, text_begin, text_end) {
+      var start_pos = test_str.indexOf(text_begin);
+      if (start_pos < 0) {
+         return '';
+      }
+      start_pos += text_begin.length;
+      var end_pos = test_str.indexOf(text_end, start_pos);
+      var text_to_get = test_str.substring(start_pos, end_pos);
+      return text_to_get;
+}
+   
+var genFullInfoFromCooike = function(cookie, callback){
+  var headers = {
+    "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+    "accept-language" : "en-US,en;q=0.8",
+    "accept" : "accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+    "accept-encoding" : "gzip, deflate, br",
+    "cookie" :  cookie
+  };
+  
+  
+   var options = { 
+          hostname: 'www.facebook.com',
+          path: "/",
+          method: 'GET',
+          headers: headers
+    };
+     var chunks = [];
+    
+    var request =  https.request(options, (resp) => {
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                chunks.push(chunk);
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                var buffer = Buffer.concat(chunks);
+                var encoding = resp.headers['content-encoding'];
+                if( encoding == 'br'){  
+                  decompress(buffer, function(err, output) {
+                    //(err, );
+                    var strContent = '';
+                    if(output){ 
+                      strContent =   output.toString();
+                      var fb_dtsg  = getStrings(strContent , '{"token":"', '"')
+                      var jazoest = '';
+                      for (var i = 0; i < fb_dtsg.length; i++) jazoest += fb_dtsg.charCodeAt(i);
+                      //console.log(jazoest);
+                      return callback(null, {fb_dtsg : fb_dtsg, jazoest : jazoest})
+                    } else callback('null')
+                  });
+                }// callback('null')
+                
+              });
+         
+        }).on("error", (err) => {
+          console.log("Error: " + err.message);
+          callback(err);
+    });
+    request.end();
+  
+}
+
+var genCookieFromAccount = function(username , password, callback){
+  
+  var hostInfo = {};
+  async.waterfall([
+      function(cb){
+          Settings.findOne({
+              key : 'hostGenCooike'
+            }).exec(function (err, finn){
+              if (!err && finn ) {
+                  hostInfo = JSON.parse(finn.value);
+              }
+              cb()
+          });
+      },
+      function(cb){
+        var options = { 
+          hostname: hostInfo.host ,
+          port : hostInfo.port,
+          path: "/accesstoken/index.php?email=" + username + "&password=" + password,
+          method: 'GET',
+          headers: {//'Cookie': user.cookie, 
+                    //'Content-Type': 'application/x-www-form-urlencoded',
+                    'user-agent' : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"
+          }
+        };
+        var data = '';
+        
+        var request =  http.request(options, (resp) => {
+                  // A chunk of data has been recieved.
+                  resp.on('data', (chunk) => {
+                    data += chunk;
+                  });
+                 
+                  // The whole response has been received. Print out the result.
+                  resp.on('end', () => {
+                    var jsonData = JSON.parse(data);
+                    if(jsonData.error_code)
+                    {
+                        console.log('[error_code] username: ' + username +  ', error_msg:'+  jsonData.error_msg );
+                        callback(jsonData.error_msg);
+                        return cb();
+                    }
+                    var cookieStr = '';
+                    var __user = '';
+                    for (var i = 0; i < jsonData.session_cookies.length; i++) {
+                        cookieStr+= jsonData.session_cookies[i].name + '=' + jsonData.session_cookies[i].value + ';';
+                        if(jsonData.session_cookies[i].name == 'c_user')
+                          __user = jsonData.session_cookies[i].value;
+                    }
+                    cookieStr = cookieStr.slice(0, -1);
+                   
+                    //console.log(cookieStr)
+                    genFullInfoFromCooike(cookieStr, function(err, data){
+                      if(err)  callback(err);
+                      else  callback(null, {__user :  __user ,cookie : cookieStr, fb_dtsg : data.fb_dtsg, jazoest : data.jazoest})
+                      cb();
+                    });
+                    
+                  });
+             
+            }).on("error", (err) => {
+              console.log("Error: " + err.message);
+               callback(err);
+               return cb();
+        });
+        request.end();
+       // cb();
+      }
+    ], err => {
+      
+    });
+}
+
 
 
 
@@ -186,27 +329,30 @@ module.exports = {
     console.log(arrayOfLines);
     //var password = req.query.password;
     
-    for (var i = 0; i < arrayOfLines.length; i++) {
-      var account = arrayOfLines[i].split('|');
+    async.eachOfSeries(arrayOfLines, (item, key, callbackEachOfSeries) => {
+      var account = item.split('|');
       var username = account[0];
       var password = account[1];
       console.log('[addAccountFb2DB] username : ' + username + ', password: ' + password);
-      exec('phantomjs ' +__dirname + "/fbGetCookie.js " + username + " " +  password + " " + hashtag, (err, stdout, stderr) => {
-        if (err) {
-          // node couldn't execute the command
-          return;
+      genCookieFromAccount(username, password, function(err, data){
+        var account = {username : username, password : password}
+        if(err){
+          
+        } else {
+          account.cookie = data.cookie;
+          account.fb_dtsg = data.fb_dtsg;
+          account.jazoest = data.jazoest;
+          account.__user = data.__user;
         }
-    
-        // the *entire* stdout and stderr (buffered)
-        console.log(`stdout: ${stdout}`);
-        console.log(`stderr: ${stderr}`);
-      });
+        AccountsFB.create(account).exec(function (err, finn){
+         
+        });
+         callbackEachOfSeries();
+      })
+    }, err => {
       
-    }
-    
-  
-		 return res.json({ message : "ok" });
-    
+    });
+		return res.json({ message : "ok" });
   },
   
   getListGroup : function(req, res){

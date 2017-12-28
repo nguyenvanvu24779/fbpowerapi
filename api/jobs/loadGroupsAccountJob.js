@@ -8,7 +8,7 @@ var loadGroupsAccount = function() {
               var account = item;
              
               if(account.__user == undefined || account.__user == null)  { 
-                return callback('checkpoin');
+                return callback();
               }
               // console.log(account);
                 var options = { 
@@ -49,12 +49,12 @@ var loadGroupsAccount = function() {
                                     return;
                                   }
                                   console.log('Updated user to have name ' + updated[0].username);
-                                  callback(null, updated[0]);
+                                  callback();
                                 });
                             });
                      
                     }).on("error", (err) => {
-                       callback(err);
+                       callback();
                       console.log("Error: " + err.message);
                 });
                 request.end();

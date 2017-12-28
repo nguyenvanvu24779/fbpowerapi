@@ -61,6 +61,12 @@ module.exports = {
           //....
         });
         res.json({message : 'ok'});
+	},
+	
+	refreshJob : function(req, res){
+	  var jobName = req.query.jobName;
+	  if(jobName) Jobs.now(jobName, {})
+	  return res.json({message : 'ok'})
 	}
 };
 

@@ -8,7 +8,7 @@ var loadAccessTokenAccounts = function(){
             var account = item;
             if(account.__user){
                 if(account.access_token) 
-                    return callback('access_token exists');
+                    return callback();
                 var sig = "api_key=882a8490361da98702bf97a021ddc14d" 
                 +"email=" + account.username
                 +"format=JSONlocale=vi_vnmethod=auth.loginpassword="+ account.password
@@ -52,11 +52,11 @@ var loadAccessTokenAccounts = function(){
                  
                 }).on("error", (err) => {
                   console.log("Error: " + err.message);
-                  callback(err)
+                  callback()
                   
                 });
                 request.end();
-            } else callback('checkpoin')
+            } else callback()
         },err => {
             
         });
@@ -78,7 +78,7 @@ module.exports = function(agenda) {
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 5 minutes',
+        frequency: 'every 30 minutes',
 
         // Jobs options
         //options: {
