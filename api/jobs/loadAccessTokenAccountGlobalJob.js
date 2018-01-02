@@ -76,7 +76,7 @@ module.exports = function(agenda) {
         name: 'loadAccessTokenAccountsGlobalJob',
 
         // set true to disabled this job
-        //disabled: true,
+        disabled: true,
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings

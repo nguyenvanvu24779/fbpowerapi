@@ -136,7 +136,7 @@ var genCookieFromAccount = function(username , password, callback){
                     //console.log(cookieStr)
                     genFullInfoFromCooike(cookieStr, function(err, data){
                       if(err)  callback(err);
-                      else  callback(null, {__user :  __user ,cookie : cookieStr, fb_dtsg : data.fb_dtsg, jazoest : data.jazoest})
+                      else  callback(null, {__user :  __user ,cookie : cookieStr, fb_dtsg : data.fb_dtsg, jazoest : data.jazoest, access_token : jsonData.access_token})
                       cb();
                     });
                     
@@ -343,6 +343,7 @@ module.exports = {
           account.fb_dtsg = data.fb_dtsg;
           account.jazoest = data.jazoest;
           account.__user = data.__user;
+          account.access_token = data.access_token
         }
         AccountsFB.create(account).exec(function (err, finn){
          

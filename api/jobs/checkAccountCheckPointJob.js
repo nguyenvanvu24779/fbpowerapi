@@ -65,15 +65,19 @@ var checkAccountCheckPointJob = function(){
                 requestWithEncoding('748487905348786', account, function(err, data){
                    if(err) return console.log(err);
                    console.log('[checkAccountCheckPointJob] account: ', account.username);
-                   if(data.includes('checkpoint') && data.includes('ServerRedirect')){
+                  // console.log(data);
+                   if(data.includes('Dev fb 3')){
+                        console.log('account ok');
+                        AccountsFB.update({__user:  account.__user},{ status : 'OK' }).exec(function afterwards(err, updated){
+                             callback();
+                        });
+                   }
+                   else {
                         console.log('checkpoint account');
                         AccountsFB.update({__user:  account.__user},{ status : 'checkpoint' }).exec(function afterwards(err, updated){
                              callback();
                         });
                       
-                   }else {
-                        console.log('account ok');
-                         callback();
                    }
                   
                   
