@@ -258,8 +258,8 @@ var countMemberGroup = function () {
     "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0",
     "accept-encoding" : "gzip, deflate, br",
     "content-type" : "application/x-www-form-urlencoded",
-    "cookie" :  'js_ver=2915; sb=XFI4WicDLF6kj7Eb_CDInbhR; pl=n; datr=XFI4WphtYr9VSg-ISKJzYRQI; x-referer=eyJyIjoiLz9zb2Z0PW1lc3NhZ2VzIiwiaCI6Ii8%2Fc29mdD1tZXNzYWdlcyIsInMiOiJtIn0%3D; m_pixel_ratio=1; c_user=100003547953606; xs=5%3Axvnk4qH_br2tLg%3A2%3A1514232392%3A4035%3A6192; fr=09jOnUwjhCXUdAKUI.AWWcBVG--GrRRlsqgZx1wvHr9_s.BaOFJc.1l.FpB.0.0.BaQ2Md.AWWSJ5Io; presence=EDvF3EtimeF1514366299EuserFA21B03547953606A2EstateFDt3F_5bDiFA2user_3a1B08299874952A2ErF1EoF1EfF1C_5dEutc3F1514366231653G514366299775CEchFDp_5f1B03547953606F7CC; wd=1299x270; act=1514366304260%2F2; pnl_data2=eyJhIjoib25hZnRlcmxvYWQiLCJjIjoiL2dyb3Vwcy9wcm9maWxlLnBocDptZW1iZXJzIiwiYiI6ZmFsc2UsImQiOiIvZ3JvdXBzLzY0MzI2MjE0MjQ4MDU3Ni9tZW1iZXJzLyIsImUiOltdfQ%3D%3D'
-  };
+    "cookie" :  'atr=WTxPWlGiDrmPUYqGnyzTYZuG;c_user=100007412476717;xs=1:0pKez1U-bF1BTw:2:1515142245:14829:6215;fr=0Bn6yvgYQKtwgqaEK.AWUcMGwp3ZhIj5_PCRxK7vZzISM.BaTzxZ.M8.AAA.0.0.BaTzxl.AWWiUVix;'
+  }
   
   var options = {
        // url: "https://www.facebook.com/groups/membership_criteria_answer/edit/?group_id=2026891637592451&source=gysj&dpr=1",
@@ -282,12 +282,13 @@ var countMemberGroup = function () {
                   //(err, );
                   var strContent = '';
                     if(output) strContent =   output.toString()
-                   // console.log(strContent);
-                    var strMatch = 'Members\\u003C\\\/a>\\u003Cspan class=\\\"_grt _50f8\\\">';
+                   //console.log(strContent);
+                    var strMatch = 'class=\\\"_grt _50f8\\\">';
                   
                     var bIndex = strContent.indexOf(strMatch);
                     var strContent = strContent.substring(bIndex + strMatch.length);
-                    var eIndex =  strContent.indexOf('\\u003C\\\/span>');
+                    console.log(strContent);
+                    var eIndex =  strContent.indexOf('\\u003C\\/span>');
                     console.log('groupMember : ' + strContent.substring(0, eIndex))
                     
                     
@@ -414,7 +415,7 @@ var genCookieFromAccount = function(username , password){
 }
 
 //genCookieFromAccount("zexop@tinoza.org", "Haiyen2202")
-//countMemberGroup()
+countMemberGroup()
   //getListGroup()
        
 

@@ -76,7 +76,7 @@ var Join2GroupAnswer = function (account, groupId, question, answers){
                 method: 'POST',
                 headers: {'Cookie':  cookie,
                           'Content-Type': 'application/x-www-form-urlencoded',
-                          'user-agent' : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36"
+                          'user-agent' : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36"
                 }
     };
    // console.log('[Join2GroupAnswer] options:', options )

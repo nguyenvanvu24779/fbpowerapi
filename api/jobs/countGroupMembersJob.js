@@ -57,11 +57,11 @@ var countMemberGroups = function () {
                                       var strContent = '';
                                         if(output) strContent =   output.toString()
                                        // console.log(strContent);
-                                        var strMatch = 'Members\\u003C\\\/a>\\u003Cspan class=\\\"_grt _50f8\\\">';
+                                       var strMatch = 'class=\\\"_grt _50f8\\\">';
                                       
                                         var bIndex = strContent.indexOf(strMatch);
                                         var strContent = strContent.substring(bIndex + strMatch.length);
-                                        var eIndex =  strContent.indexOf('\\u003C\\\/span>');
+                                        var eIndex =  strContent.indexOf('\\u003C\\/span>');
                                         console.log('groupName:  ' + group.name + ',groupMember : ' + strContent.substring(0, eIndex));
                                         var countMembers =  (strContent.substring(0, eIndex)).replace(',' , '');
                                         Groups.update({groupId: group.groupId },{ countMembers : countMembers  }).exec(function afterwards(err, updated){})
