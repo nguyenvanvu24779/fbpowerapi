@@ -7,7 +7,11 @@
 
 module.exports = {
     startLiveStream : function(req, res){
-        Jobs.now('shareLiveStream2GroupsJob', {url : 'test url', sharesAmount : 200, timeShareLimit : 30})
+        var sharesAmount = req.query.sharesAmount;
+        var timeShareLimit = req.query.timeShareLimit;
+        var videoId = req.query.videoId;
+        
+        Jobs.now('shareLiveStream2GroupsJob', {url : 'test url', videoId : videoId , sharesAmount : sharesAmount, timeShareLimit : timeShareLimit})
         res.json({ message : 'ok' });
     }
 	

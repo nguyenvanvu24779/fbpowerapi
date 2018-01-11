@@ -108,7 +108,7 @@ module.exports = function(agenda) {
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 30 minutes',
+        frequency: 'every 60 minutes',
 
         // Jobs options
         //options: {

@@ -13,6 +13,10 @@ module.exports = {
     groupId: {
       type: 'string',
       unique: true
+    },
+    ShareDetail: {
+      collection: 'ShareDetail',
+      via: 'group'
     }
 
   },

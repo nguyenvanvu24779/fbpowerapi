@@ -26,9 +26,9 @@ var countMemberGroups = function () {
                 async.eachOfSeries(groups, (item, key, cbEachOfSeries) => {
                         var group = item;
                         var headers = {
-                            "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
-                            "accept-language" : "en-US,en;q=0.8",
-                            "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                          //  "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+                            "accept-language" : "en-US,en;q=0.9",
+                            "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
                             "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0",
                             "accept-encoding" : "gzip, deflate, br",
                            // "content-type" : "application/x-www-form-urlencoded",
@@ -36,10 +36,9 @@ var countMemberGroups = function () {
                         };
                       
                         var options = {
-                           // url: "https://www.facebook.com/groups/membership_criteria_answer/edit/?group_id=2026891637592451&source=gysj&dpr=1",
                             headers: headers,
                             hostname: 'www.facebook.com',
-                            path: "/ajax/home/generic.php?dpr=1&ajaxpipe=1&path=%2Fgroups%2F" + group.groupId + "%2Fmembers%2F&__a=1&__req=fetchstream_2&__be=1&__pc=PHASED%3ADEFAULT&__rev=3548965&__spin_r=3548965&__spin_b=trunk&__spin_t=1514366280&__adt=2&ajaxpipe_fetch_stream=1",
+                            path: '/groups/' + group.groupId + '/members/', //"/ajax/home/generic.php?dpr=1&ajaxpipe=1&path=%2Fgroups%2F" + group.groupId + "%2Fmembers%2F&__a=1&__req=fetchstream_2&__be=1&__pc=PHASED%3ADEFAULT&__rev=3548965&__spin_r=3548965&__spin_b=trunk&__spin_t=1514366280&__adt=2&ajaxpipe_fetch_stream=1",
                             method: 'GET',
                         };
                       
@@ -57,11 +56,12 @@ var countMemberGroups = function () {
                                       var strContent = '';
                                         if(output) strContent =   output.toString()
                                        // console.log(strContent);
-                                       var strMatch = 'class=\\\"_grt _50f8\\\">';
+                                       var strMatch = '<span class=\"_grt _50f8\">';
                                       
                                         var bIndex = strContent.indexOf(strMatch);
+                                        console.log(bIndex);
                                         var strContent = strContent.substring(bIndex + strMatch.length);
-                                        var eIndex =  strContent.indexOf('\\u003C\\/span>');
+                                        var eIndex =  strContent.indexOf('<\/span>');
                                         console.log('groupName:  ' + group.name + ',groupMember : ' + strContent.substring(0, eIndex));
                                         var countMembers =  (strContent.substring(0, eIndex)).replace(',' , '');
                                         Groups.update({groupId: group.groupId },{ countMembers : countMembers  }).exec(function afterwards(err, updated){})
@@ -98,7 +98,7 @@ module.exports = function(agenda) {
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 30 minutes',
+        frequency: 'every 60 minutes',
 
         // Jobs options
         //options: {
