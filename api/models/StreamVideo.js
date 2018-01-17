@@ -19,6 +19,10 @@ module.exports = {
       defaultsTo: function() {
         return this.timeShareLimit*this.sharesAmount*(this.timeShareLimit/30);
       }
+    },
+    ShareDetail: {
+      collection: 'ShareDetail',
+      via: 'streamvideo'
     }
 
   }

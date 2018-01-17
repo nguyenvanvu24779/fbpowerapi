@@ -414,8 +414,124 @@ var genCookieFromAccount = function(username , password){
   
 }
 
+
+var getStatusVideo = function(){
+   var headers = {
+   // "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+    "accept-language" : "en-US,en;q=0.9",
+    "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+    "accept-encoding" : "gzip, deflate, br",
+    "cookie" :  "datr=PfgPVtLPN6FahZqftRH08vKi; sb=RMDnV_Cf5qCLsNpFUiFfQ0Xj; c_user=100003547953606; xs=12%3AwoI5UXh_p31PUg%3A2%3A1505392771%3A4035%3A6192; fr=0bjlZrd4hpXNhJ5bE.AWVaxGWl2Ejd68KboK8xUdaBRlc.BZulQb.Rp.Fpa.0.0.BaXFA1.AWWZQ1NO; wd=822x672; act=1516002241560%2F2; presence=EDvF3EtimeF1516002253EuserFA21B03547953606A2EstateFDt3F_5bDiFA2user_3a1B02635509719A2EoF1EfF1C_5dEutc3F1516002243519G516002253377CEchFDp_5f1B03547953606F23CC"
+  };
+  
+  
+   var options = { 
+          hostname: 'www.facebook.com',
+          path: "/ChinaGlobalTVNetwork/videos/2091900450850764/",
+          method: 'GET',
+          headers: headers
+    };
+     var chunks = [];
+    
+    var request =  https.request(options, (resp) => {
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                chunks.push(chunk);
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                var buffer = Buffer.concat(chunks);
+                var encoding = resp.headers['content-encoding'];
+                if( encoding == 'br'){  
+                  decompress(buffer, function(err, output) {
+                    //(err, );
+                    var strContent = '';
+                    if(output){ 
+                      strContent =   output.toString();
+                      console.log(strContent.includes('<span class=\"_2wrk\">LIVE<\/span>'));
+                      
+                    }
+                  });
+                }
+              });
+         
+        }).on("error", (err) => {
+          console.log("Error: " + err.message);
+    });
+    request.end();
+  
+}
+
+var getLiveStreamFromProfile = function(){
+  var headers = {
+   // "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+    "accept-language" : "en-US,en;q=0.9",
+    "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+    "accept-encoding" : "gzip, deflate, br",
+    "cookie" :  "datr=WTxPWlGiDrmPUYqGnyzTYZuG;c_user=100007412476717;xs=1:0pKez1U-bF1BTw:2:1515142245:14829:6215;fr=0Bn6yvgYQKtwgqaEK.AWUcMGwp3ZhIj5_PCRxK7vZzISM.BaTzxZ.M8.AAA.0.0.BaTzxl.AWWiUVix;"   
+  };
+  
+  
+   var options = { 
+          hostname: 'www.facebook.com',
+          path: "/ervis.likmeta/videos_by",
+          method: 'GET',
+          headers: headers
+    };
+     var chunks = [];
+    
+    var request =  https.request(options, (resp) => {
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                chunks.push(chunk);
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                var buffer = Buffer.concat(chunks);
+                var encoding = resp.headers['content-encoding'];
+                if( encoding == 'br'){  
+                  decompress(buffer, function(err, output) {
+                    //(err, );
+                    var strContent = '';
+                    if(output){ 
+                      strContent =   output.toString();
+                      if(strContent.includes('Now Live')){
+                        var index = strContent.indexOf('\/videos/vb.');
+                        strContent = strContent.substring(index + 11);
+                        index = strContent.indexOf('\/');
+                        strContent = strContent.substring(index + 1);
+                        var videoId = strContent.substring(0,  strContent.indexOf('\/'));
+                        console.log(videoId)
+                      }
+                      //console.log(strContent);
+                      
+                    }
+                  });
+                }
+              });
+         
+        }).on("error", (err) => {
+          console.log("Error: " + err.message);
+    });
+    request.end();
+}
+
+
+const { URL } = require('url');
+const myURL = new URL('https://www.facebook.com/profile.php?id=100007132059174');
+if(myURL.includes('profile.php')){
+  
+}
+console.log(myURL.pathname.replace(/\//g,'' ));
+//getLiveStreamFromProfile();
+
+//getStatusVideo();
 //genCookieFromAccount("zexop@tinoza.org", "Haiyen2202")
-countMemberGroup()
+//countMemberGroup()
   //getListGroup()
        
 

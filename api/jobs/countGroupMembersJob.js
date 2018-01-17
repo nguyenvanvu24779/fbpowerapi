@@ -29,7 +29,7 @@ var countMemberGroups = function () {
                           //  "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
                             "accept-language" : "en-US,en;q=0.9",
                             "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-                            "user-agent" : "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0",
+                            "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
                             "accept-encoding" : "gzip, deflate, br",
                            // "content-type" : "application/x-www-form-urlencoded",
                             "cookie" : accountGlobal.cookie
@@ -68,11 +68,11 @@ var countMemberGroups = function () {
                                         
                                     });
                                 }
-                                cbEachOfSeries()
+                                setTimeout(function(){ cbEachOfSeries()},15000); 
                             });
                     }).on("error", (err) => {
                         //  console.log("Error: " + err.message);;
-                        cbEachOfSeries()
+                        setTimeout(function(){ cbEachOfSeries()},15000); 
                     });
               
                     request.end();
@@ -98,7 +98,7 @@ module.exports = function(agenda) {
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 60 minutes',
+        frequency: 'every 55 minutes',
 
         // Jobs options
         //options: {

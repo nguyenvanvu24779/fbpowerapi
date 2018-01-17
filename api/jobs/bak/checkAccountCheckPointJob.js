@@ -104,11 +104,11 @@ module.exports = function(agenda) {
         name: 'checkAccountCheckPointJob',
 
         // set true to disabled this job
-        //disabled: false,
+        disabled: true,
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 60 minutes',
+        //frequency: 'every 35 minutes',
 
         // Jobs options
         //options: {

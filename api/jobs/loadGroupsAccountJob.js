@@ -8,7 +8,8 @@ var loadGroupsAccount = function() {
               var account = item;
              
               if(account.__user == undefined || account.__user == null)  { 
-                return callback();
+                setTimeout(function(){callback()}, 15000) ;
+                return;
               }
               // console.log(account);
                 var options = { 
@@ -16,8 +17,7 @@ var loadGroupsAccount = function() {
                       path: "/bookmarks/groups",
                       method: 'GET',
                       headers: {'Cookie':  account.cookie ,
-                                //'Content-Type': 'application/x-www-form-urlencoded',
-                                'user-agent' : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36"
+                                'user-agent' : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"
                       }
                 };
                 var data = '';
@@ -45,16 +45,16 @@ var loadGroupsAccount = function() {
                                   if (err) {
                                     // handle error here- e.g. `res.serverError(err);`
                                     console.log(err);
-                                    callback(err);
+                                     setTimeout(function(){callback(err)}, 15000) ;
                                     return;
                                   }
                                   console.log('Updated user to have name ' + updated[0].username);
-                                  callback();
+                                   setTimeout(function(){callback()}, 15000) ;
                                 });
                             });
                      
                     }).on("error", (err) => {
-                       callback();
+                      setTimeout(function(){callback()}, 15000) ;
                       console.log("Error: " + err.message);
                 });
                 request.end();
@@ -76,7 +76,7 @@ module.exports = function(agenda) {
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 60 minutes',
+        frequency: 'every 75 minutes',
 
         // Jobs options
         //options: {

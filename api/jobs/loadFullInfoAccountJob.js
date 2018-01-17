@@ -108,11 +108,21 @@ var loadFullInfoAccountJob = function(){
                     else{
                         fb_dtsg = data.fb_dtsg;
                         jazoest = data.jazoest;
-                        AccountsFB.update({__user:  account.__user},{ fb_dtsg :  fb_dtsg ,jazoest : jazoest }).exec(function afterwards(err, updated){});
+                        
+                        if(fb_dtsg.length < 10){
+                             AccountsFB.update({__user:  account.__user},{ status : 'checkpoint' }).exec(function afterwards(err, updated){});
+                        }  else AccountsFB.update({__user:  account.__user},{ fb_dtsg :  fb_dtsg ,jazoest : jazoest }).exec(function afterwards(err, updated){});
+                    
+                       
                     }
-                    callback();
+                    console.log('[loadFullInfoAccountJob] username: ' + account.username);
+                    console.log('[loadFullInfoAccountJob] jazoest: ' + jazoest);
+                    console.log('[loadFullInfoAccountJob] fb_dtsg: ' + fb_dtsg);
+                    console.log('[loadFullInfoAccountJob] jazoest: ' + jazoest);
+                   
+                    setTimeout(function(){callback();}, 15000 ) 
                 });
-            } else callback()
+            } else  setTimeout(function(){callback();}, 15000 ) 
         },err => {
             
         });
@@ -134,7 +144,7 @@ module.exports = function(agenda) {
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 180 minutes',
+        frequency: 'every 165 minutes',
 
         // Jobs options
         //options: {

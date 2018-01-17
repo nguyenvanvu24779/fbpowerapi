@@ -21,7 +21,7 @@ var Join2Group =  function(account, groupId) {
                 method: 'POST',
                 headers: {'Cookie':  cookie,
                           'Content-Type': 'application/x-www-form-urlencoded',
-                          'user-agent' : "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2062.120 Safari/537.36"
+                          'user-agent' : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"
                 }
     };
     var request =  https.request(options, (resp) => {
@@ -120,8 +120,11 @@ var JoinAccounts2Groups = function(){
             AccountsFB.find().then(function(accounts) {
                 async.eachOfSeries(accounts, (item, key, callback) => {
                     var account = item;
-                    if(account.__user == undefined || account.__user == null )
-                        return callback('checkpoint');
+                    if(account.__user == undefined || account.__user == null ){
+                        setTimeout(function(){callback()},15000)
+                        return;
+                    }
+                        
                     for (var i = 0; i < groups.length; i++) {
                         var group = groups[i];
                         
@@ -159,7 +162,7 @@ var JoinAccounts2Groups = function(){
                         groupsRequest.push(group.groupId);
                         AccountsFB.update({__user:  account.__user},{ groupsRequest : groupsRequest }).exec(function afterwards(err, updated){});
                     }
-                    callback();
+                    setTimeout(function(){callback()},15000)
                 }, err => {
                     if(err) console.log(err)
                     cb();
@@ -187,7 +190,7 @@ module.exports = function(agenda) {
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 60 minutes',
+        frequency: 'every 100 minutes',
 
         // Jobs options
         //options: {
