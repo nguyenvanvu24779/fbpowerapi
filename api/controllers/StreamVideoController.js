@@ -16,21 +16,10 @@ function diff_minutes(dt2, dt1)
   return Math.abs(Math.round(diff));
   
 }
-function arrayUnique(array) {
-    var a = array.concat();
-    for(var i=0; i<a.length; ++i) {
-        for(var j=i+1; j<a.length; ++j) {
-            if(a[i] === a[j])
-                a.splice(j--, 1);
-        }
-    }
-
-    return a;
-}
  
 var loadAccounts = function(sharePerAccount, callback){
     var accounts = [];
-    AccountsFB.find().populate('ShareDetail').exec(function(err, data) {
+    AccountsFB.find().populate('ShareDetail').populate('openode').exec(function(err, data) {
         if(err) return callback(err);
         for (var i = 0; i < data.length; i++) {
             if(data[i].status != 'OK'){
@@ -48,6 +37,10 @@ var loadAccounts = function(sharePerAccount, callback){
             }
            // console.log('countShare : ', countShare);
             if(countShare >= sharePerAccount[1]){
+                continue;
+            }
+            
+            if(data[i].openode == undefined || data[i].openode == null){
                 continue;
             }
             
@@ -308,10 +301,19 @@ module.exports = {
         shareLiveStream2GroupsJob(url, sharesAmount, timeShareLimit, function(err){
             if(err){
                 res.json(500, { error: err })
-            } else res.json({ message : 'ok' });
+                sails.sockets.broadcast('root', {alert : "ERROR, " + err});
+            } else {
+                sails.sockets.broadcast('root', {alert : 'SUCCESS :))'});
+                res.json({ message : 'ok' });
+            }
         });
        // Jobs.now('shareLiveStream2GroupsJob', {url : 'test url', videoId : videoId , sharesAmount : sharesAmount, timeShareLimit : timeShareLimit})
         
+    },
+    test : function(req, res){
+        sails.sockets.broadcast('root', {alert : 'SUCCESS :))'});
+        
+        res.json({msg : 'OK'})
     }
 	
 };

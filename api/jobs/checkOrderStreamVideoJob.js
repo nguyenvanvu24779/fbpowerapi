@@ -99,8 +99,8 @@ var checkOrderStreamVideoJob = function(callback){
                         if(err) return cbEachOfSeries();
                         if(videoId.length > 0){
                             console.log('Start Share Stream...')
-                            Jobs.now('shareLiveStream2GroupsJob', { videoId : videoId , streamVideoId : item.id})
-                            StreamVideo.update({id: item.id },{ status : 'Processing'  }).exec(function afterwards(err, updated){})
+                            Jobs.now('shareLiveStream2GroupsJob', { videoId : videoId , streamVideoId : item.id, timeShareLimit : item.timeShareLimit})
+                            StreamVideo.update({id: item.id },{ status : 'Processing' , videoId : videoId }).exec(function afterwards(err, updated){})
                         } else {
                             if(diff_minutes(new Date(item.createdAt), new Date()) > 15){
                                 StreamVideo.update({id: item.id },{ status : 'Cancel', error_msg : 'stream not found'  }).exec(function afterwards(err, updated){})
@@ -149,7 +149,7 @@ module.exports = function(agenda) {
 
         // execute job
         run: function(job, done) {
-            sails.log.info("Agenda job : checkOrderStreamVideoJob");
+           // sails.log.info("Agenda job : checkOrderStreamVideoJob");
             checkOrderStreamVideoJob(function(err){
                  done();
             });

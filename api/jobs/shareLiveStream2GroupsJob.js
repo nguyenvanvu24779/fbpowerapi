@@ -78,7 +78,7 @@ var post2GroupVideo = function(videoId ,groupId, message, account ,callback){
       request.write(urlParameters);
       request.end();
 }
-var shareLiveStream2GroupsJob = function(videoId, streamVideoId, callback){
+var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,callback){
     var shareDetails = [];
     async.waterfall([
         function(callbackWaterfall){
@@ -87,7 +87,7 @@ var shareLiveStream2GroupsJob = function(videoId, streamVideoId, callback){
                     return callbackWaterfall(err);
                 }
                 shareDetails = data;
-                console.log('shareDetails:', shareDetails)
+                //console.log('shareDetails:', shareDetails)
                 callbackWaterfall();
              });
                
@@ -105,18 +105,14 @@ var shareLiveStream2GroupsJob = function(videoId, streamVideoId, callback){
                             
                         });
                     }
-                    cbEachOfSeries();
+                    setTimeout(function(){cbEachOfSeries();}, shareDetails.length > 1 ?  (timeShareLimit*60/shareDetails.length)*1000 : 1000)  ;
                 }); 
-               
-               
-                
-                
-               
             }, err =>{
                 callbackWaterfall();
             })
         }
     ], err => {
+        StreamVideo.update({id: streamVideoId },{ status : 'Done' }).exec(function afterwards(err, updated){})
         if(err)
         {
             console.log('[shareLiveStream2GroupsJob] err:', err );
@@ -152,7 +148,7 @@ module.exports = function(agenda) {
         run: function(job, done) {
             sails.log.info("Agenda job : shareLiveStream2GroupsJob");
             sails.log.info("Agenda job : shareLiveStream2GroupsJob, attr Data: ", job.attrs.data);
-            shareLiveStream2GroupsJob(job.attrs.data.videoId,job.attrs.data.streamVideoId, function(err){
+            shareLiveStream2GroupsJob(job.attrs.data.videoId,job.attrs.data.streamVideoId, job.attrs.data.timeShareLimit, function(err){
                 
             })
             done();

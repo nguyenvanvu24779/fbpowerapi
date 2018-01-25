@@ -86,7 +86,11 @@ var loadFullInfoAccountJob = function(){
                     else{
                         fb_dtsg = data.fb_dtsg;
                         jazoest = data.jazoest;
-                        AccountsFB.update({__user:  account_global.__user},{ fb_dtsg :  fb_dtsg ,jazoest : jazoest }).exec(function afterwards(err, updated){});
+                        
+                        account_global.fb_dtsg = fb_dtsg;
+                        account_global.jazoest = jazoest;
+                        
+                        Settings.update({key : 'account_global'},{ value :  JSON.stringify(account_global) }).exec(function afterwards(err, updated){});
                         console.log('[loadFullInfoAccountJob] account_global');
                         
                     }

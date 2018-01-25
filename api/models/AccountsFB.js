@@ -16,7 +16,12 @@ module.exports = {
     ShareDetail: {
       collection: 'sharedetail',
       via: 'account'
-    }
+    },
+    
+    openode : {
+         model: 'Openode'
+    },
+    
   },
 };
 

@@ -116,7 +116,7 @@ module.exports = {
                                         if (err)
                                             console.log(err);
                                         else{ 
-                                            //console.log(data);
+                                            console.log(data);
                                             if(data.includes("custom_questions")){
                                               data  = data.replace("for (;;);", "");
                                               var obj = JSON.parse(data);
@@ -166,7 +166,6 @@ module.exports = {
             console.log(url);
             
             FB.api(url, function(response){
-              
                 if(response && ! response.error){
                     var data = response.data;
                     async.forEachOf(data, (item, key, callback) => {
@@ -260,10 +259,14 @@ module.exports = {
     list: function(req, res) {
         var perPage = req.query.per_page;
         var currentPage = req.query.page;
+        var sortBy = req.query.sortBy;
+        if(sortBy == null || sortBy == undefined){
+            sortBy = 'createdAt';
+        }
         var conditions = {active: true};
  
         //Using Promises 
-        pager.paginate(Groups, {}, currentPage, perPage, [], 'createdAt DESC').then(function(records){
+        pager.paginate(Groups, {}, currentPage, perPage, [], sortBy + ' DESC').then(function(records){
             res.json(records);
         }).catch(function(err) {
             console.log(err);

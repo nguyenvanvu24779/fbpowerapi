@@ -520,13 +520,18 @@ var getLiveStreamFromProfile = function(){
     request.end();
 }
 
+var Client = require('node-rest-client').Client;
+var client = new Client();
 
-const { URL } = require('url');
-const myURL = new URL('https://www.facebook.com/profile.php?id=100007132059174');
-if(myURL.includes('profile.php')){
-  
+var 	addOpenode = function(){
+	   // var siteUrl = req.query.siteUrl;
+	    client.get("http://ip-api.com/json", function (data, response) {
+            console.log(response);
+           
+        });
 }
-console.log(myURL.pathname.replace(/\//g,'' ));
+addOpenode();
+
 //getLiveStreamFromProfile();
 
 //getStatusVideo();

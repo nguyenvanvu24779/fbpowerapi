@@ -64,7 +64,7 @@ var countMemberGroups = function () {
                                         var eIndex =  strContent.indexOf('<\/span>');
                                         console.log('groupName:  ' + group.name + ',groupMember : ' + strContent.substring(0, eIndex));
                                         var countMembers =  (strContent.substring(0, eIndex)).replace(',' , '');
-                                        Groups.update({groupId: group.groupId },{ countMembers : countMembers  }).exec(function afterwards(err, updated){})
+                                        Groups.update({groupId: group.groupId },{ countMembers : parseInt(countMembers)  }).exec(function afterwards(err, updated){})
                                         
                                     });
                                 }

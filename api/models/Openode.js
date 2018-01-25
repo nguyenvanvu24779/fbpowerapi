@@ -8,7 +8,14 @@
 module.exports = {
 
   attributes: {
-
+    account: {
+      collection: 'AccountsFB',
+      via: 'openode'
+    },
+    siteUrl: {
+      type: 'string',
+      unique: true
+    },
   }
 };
 

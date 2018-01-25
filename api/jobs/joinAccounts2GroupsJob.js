@@ -121,13 +121,11 @@ var JoinAccounts2Groups = function(){
                 async.eachOfSeries(accounts, (item, key, callback) => {
                     var account = item;
                     if(account.__user == undefined || account.__user == null ){
-                        setTimeout(function(){callback()},15000)
-                        return;
+                       
+                        return callback();
                     }
                         
-                    for (var i = 0; i < groups.length; i++) {
-                        var group = groups[i];
-                        
+                    async.eachOfSeries(groups, (group, k, callbackGroups) => {
                        // console.log('account: ', account);
                         //console.log('group: ', group);
                         
@@ -136,7 +134,7 @@ var JoinAccounts2Groups = function(){
                                 return ele == group.groupId;
                             })
                             if(findAcc != undefined)
-                               continue;
+                               return callbackGroups();
                                // return callback('joined');
                         }
                         
@@ -145,12 +143,12 @@ var JoinAccounts2Groups = function(){
                                 return ele == group.groupId;
                             })
                             if(findAcc != undefined)
-                               continue;
+                               return callbackGroups();
                                // return callback('requested');
                         }
                         if(group.question &&  group.question.length > 0){
-                            if(group.answer == undefined) continue;//return callback('answer');
-                            if(group.answer &&  group.answer.length == 0) continue;//eturn callback('answer');
+                            if(group.answer == undefined) return callbackGroups();
+                            if(group.answer &&  group.answer.length == 0) return callbackGroups();
                         } 
                             
                         
@@ -161,8 +159,13 @@ var JoinAccounts2Groups = function(){
                         var groupsRequest = account.groupsRequest ? account.groupsRequest : []; 
                         groupsRequest.push(group.groupId);
                         AccountsFB.update({__user:  account.__user},{ groupsRequest : groupsRequest }).exec(function afterwards(err, updated){});
-                    }
-                    setTimeout(function(){callback()},15000)
+                        setTimeout(function() {
+                            callbackGroups();
+                        }, 5000); 
+                    }, err => {
+                        setTimeout(function(){callback()},5000)
+                    });
+                    
                 }, err => {
                     if(err) console.log(err)
                     cb();
