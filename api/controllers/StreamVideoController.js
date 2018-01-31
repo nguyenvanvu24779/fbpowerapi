@@ -101,13 +101,13 @@ var loadGroups = function(groupMemberRequire ,accounts, callback){
 var loadMessages = function(accounts,  callback){
     ContentShare.find().exec(function(err, messages){
        if(err) return callback(err);
-       var tmpMsgs = messages;
+       var tmpMsgs = messages.slice();
        for (var i = 0; i < accounts.length; i++) {
            var index  = Math.floor(Math.random()*tmpMsgs.length);
            var message = tmpMsgs[index];
            accounts[i].messageShare = message.content;
            tmpMsgs.splice(index, 1);
-           if(tmpMsgs.length <= 0) tmpMsgs = messages;
+           if(tmpMsgs.length <= 0) tmpMsgs = messages.slice();
        }
        callback(null,accounts);
        

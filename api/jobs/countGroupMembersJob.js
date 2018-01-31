@@ -2,9 +2,10 @@ const https = require('https');
 var async = require("async");
 const decompress = require('iltorb').decompress;
 
-var countMemberGroups = function () {
+var countMemberGroups = function (cbG) {
     var accountGlobal = {}
     var groups = [];
+    var groupMemberRequire = 10000;
     async.waterfall([
             function(cb){
                 Settings.findOne({
@@ -12,6 +13,16 @@ var countMemberGroups = function () {
                   }).exec(function (err, finn){
                     if (!err && finn ) {
                         accountGlobal = JSON.parse(finn.value);
+                    }
+                    cb()
+                });  
+            },
+            function(cb){
+                Settings.findOne({
+                    key : 'groupMemberRequire'
+                  }).exec(function (err, finn){
+                    if (!err && finn ) {
+                        groupMemberRequire = parseInt(finn.value) > 10000 ? 10000 : parseInt(finn.value) ;
                     }
                     cb()
                 });  
@@ -25,6 +36,9 @@ var countMemberGroups = function () {
             function(cb){
                 async.eachOfSeries(groups, (item, key, cbEachOfSeries) => {
                         var group = item;
+                        if(group.countMembers && group.countMembers >= groupMemberRequire ){
+                            return cbEachOfSeries();
+                        }
                         var headers = {
                           //  "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
                             "accept-language" : "en-US,en;q=0.9",
@@ -59,20 +73,27 @@ var countMemberGroups = function () {
                                        var strMatch = '<span class=\"_grt _50f8\">';
                                       
                                         var bIndex = strContent.indexOf(strMatch);
-                                        console.log(bIndex);
+                                        //console.log(bIndex);
                                         var strContent = strContent.substring(bIndex + strMatch.length);
                                         var eIndex =  strContent.indexOf('<\/span>');
                                         console.log('groupName:  ' + group.name + ',groupMember : ' + strContent.substring(0, eIndex));
                                         var countMembers =  (strContent.substring(0, eIndex)).replace(',' , '');
-                                        Groups.update({groupId: group.groupId },{ countMembers : parseInt(countMembers)  }).exec(function afterwards(err, updated){})
-                                        
+                                        if(isNaN( parseInt(countMembers)) != true &&  parseInt(countMembers) < groupMemberRequire){
+                                            Groups.destroy({id : group.id}).exec(function(err){
+                                                if(err)
+                                                    console.log('delete groupName: ' + group.name +', err', err);
+                                                else console.log('delete groupName: ' + group.name);
+                                            })
+                                        } else if(isNaN( parseInt(countMembers)) != true){
+                                            Groups.update({groupId: group.groupId },{ countMembers : parseInt(countMembers)  }).exec(function afterwards(err, updated){})
+                                        }
                                     });
                                 }
-                                setTimeout(function(){ cbEachOfSeries()},15000); 
+                                setTimeout(function(){ cbEachOfSeries()},5000); 
                             });
                     }).on("error", (err) => {
                         //  console.log("Error: " + err.message);;
-                        setTimeout(function(){ cbEachOfSeries()},15000); 
+                        setTimeout(function(){ cbEachOfSeries()},5000); 
                     });
               
                     request.end();
@@ -81,7 +102,7 @@ var countMemberGroups = function () {
                 })
             }
     ], err => {
-        
+        cbG();
     })
    
    
@@ -98,7 +119,7 @@ module.exports = function(agenda) {
 
         // method can be 'every <interval>', 'schedule <when>' or now
         //frequency supports cron strings
-        frequency: 'every 55 minutes',
+        frequency: 'every 1440 minutes',
 
         // Jobs options
         //options: {
@@ -112,8 +133,10 @@ module.exports = function(agenda) {
         // execute job
         run: function(job, done) {
             sails.log.info("Agenda job : countGroupMembersJob");
-            countMemberGroups();
-            done();
+            countMemberGroups(function(){
+                done();
+            });
+            
         },
     };
     return job;

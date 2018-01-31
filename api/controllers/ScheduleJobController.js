@@ -67,6 +67,20 @@ module.exports = {
 	  var jobName = req.query.jobName;
 	  if(jobName) Jobs.now(jobName, {})
 	  return res.json({message : 'ok'})
+	},
+	
+	test: function(req, res){
+	    ScheduleJob.find({name :'joinAccounts2Groups',  nextRunAt: { $not : { $type : 10 } ,  $exists : true } }).exec(function(err, data){
+                    	    var now = new Date();
+                    	    var nextRunAt = new Date(data[0].nextRunAt);
+                    	    if( now.getTime() >= nextRunAt.getTime() ){
+                    	        console.log('nextRunAt:' + data.nextRunAt);
+                    	       // return callbackGroups('nextRunAt:' + data.nextRunAt)
+                    	    }
+                    	    
+                    	    //console.log(data[0].nextRunAt)
+	    });
+	      return res.json({message : 'ok'})
 	}
 };
 

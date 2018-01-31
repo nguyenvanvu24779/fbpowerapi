@@ -116,7 +116,7 @@ module.exports = {
                                         if (err)
                                             console.log(err);
                                         else{ 
-                                            console.log(data);
+                                           // console.log(data);
                                             if(data.includes("custom_questions")){
                                               data  = data.replace("for (;;);", "");
                                               var obj = JSON.parse(data);

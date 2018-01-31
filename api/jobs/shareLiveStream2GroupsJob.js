@@ -1,5 +1,8 @@
 var async = require("async");
 const https = require('https');
+var Client = require('node-rest-client').Client;
+var client = new Client();
+
 
 
 var post2GroupVideo = function(videoId ,groupId, message, account ,callback){
@@ -7,76 +10,14 @@ var post2GroupVideo = function(videoId ,groupId, message, account ,callback){
     var cookie = account.cookie;
     var fb_dtsg = account.fb_dtsg;
     var jazoest = account.jazoest;
-    var urlParameters = 
-                "composer_entry_time=7"+
-                "&composer_session_id=de9f2c9a-8d7e-4bc4-87bd-6c988817e04d"+
-                "&composer_session_duration=2774"+
-                "&composer_source_surface=group"+
-                "&hide_object_attachment=false"+
-                "&num_keystrokes=16"+
-                "&num_pastes=0"+
-                "&privacyx&ref=group"+
-                "&xc_sticker_id=0"+
-                "&target_type=group"+
-                "&xhpc_message="+  encodeURI(message)  +
-                "&xhpc_message_text="+ encodeURI(message)  +
-                "&is_react=true"+
-                "&xhpc_composerid=rc.u_jsonp_4_r"+
-                "&xhpc_targetid=" + groupId +
-                "&xhpc_context=profile"+
-                "&xhpc_timeline=false"+
-                "&xhpc_finch=false"+
-                "&xhpc_aggregated_story_composer=false"+
-                "&xhpc_publish_type=1"+
-                "&xhpc_fundraiser_page=false"+
-                "&__user=" + __user +
-                "&__a=1"+
-               // "&__dyn="+ __dyn + 
-                "&__req=49"+
-                "&__be=1"+
-                "&__pc=EXP1%3Ahome_page_pkg"+
-                "&__rev=3453879"+
-                "&fb_dtsg="+ fb_dtsg + 
-                "&jazoest="+ jazoest + 
-                "&__spin_r=3453879"+
-                "&__spin_b=trunk"+
-                "&__spin_t=1510641759"+
-                "&attachment[type]=11"+
-                "&attachment[params][0]=" + videoId +
-                "&attachment[reshare_original_post]=false"+
-                "&xc_share_params=[" + videoId + "]" +
-                "&xc_share_target_type=11"
-	    
-	    var options = { 
-            hostname: 'www.facebook.com',
-            path: "/ajax/updatestatus.php?av=" + __user +  "&dpr=1",
-            method: 'POST',
-            headers: {'Cookie': cookie,
-                      'Content-Type': 'application/x-www-form-urlencoded',
-                      'user-agent' : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
-            }
-        };
-	    var request =  https.request(options, (resp) => {
-              var data = '';
-             
-              // A chunk of data has been recieved.
-              resp.on('data', (chunk) => {
-                data += chunk;
-              });
-             
-              // The whole response has been received. Print out the result.
-              resp.on('end', () => {
-               // console.log('end' + data);
-               callback();
-              });
-         
-        }).on("error", (err) => {
-          console.log("Error: " + err.message);
-          callback(err);
-        });
-      
-      request.write(urlParameters);
-      request.end();
+    
+    var rest = client.get(`http://${account.openode.siteUrl}/post2GroupVideo?groupId=${groupId}&message=${message}&c_user=${__user}&cookie=${cookie}&fb_dtsg=${fb_dtsg}&jazoest=${jazoest}&videoId=${videoId}&userAgent=${sails.config.globals.userAgent}`, function (data, response) {
+        callback();      
+    });
+    rest.on('error', function (err) {
+        console.log('[post2GroupVideo] request error', err);
+        callback(err);
+    });
 }
 var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,callback){
     var shareDetails = [];
@@ -97,13 +38,14 @@ var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,
                 var account = {};
                 AccountsFB.findOne({
                     id : item.account
-                }).exec(function (err, finn){
+                }).populate('openode').exec(function (err, finn){
                     if (!err && finn ) {
                         account  = finn;
                         console.log('[shareLiveStream2GroupsJob] post2GroupVideo: ', account);
-                        post2GroupVideo(videoId, item.shareGroupId, item.messageShare,account, function(err, data){
-                            
-                        });
+                        if(account.openode)
+                            post2GroupVideo(videoId, item.shareGroupId, item.messageShare,account, function(err, data){
+                                
+                            });
                     }
                     setTimeout(function(){cbEachOfSeries();}, shareDetails.length > 1 ?  (timeShareLimit*60/shareDetails.length)*1000 : 1000)  ;
                 }); 
