@@ -35,6 +35,7 @@ module.exports = {
                            return res.json(500, { error: err })
                        }
                        if(accounts.length < accountsPerOpenode ){
+                           sails.sockets.broadcast('root', {msg : 'accounts Fb not enough'});
                            return res.json(500, { error: 'accounts Fb not enough' })
                        }
                         Openode.create(openode).exec(function createCB(err1, create){

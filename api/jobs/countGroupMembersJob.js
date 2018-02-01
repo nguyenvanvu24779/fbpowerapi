@@ -5,6 +5,7 @@ const decompress = require('iltorb').decompress;
 var countMemberGroups = function (cbG) {
     var accountGlobal = {}
     var groups = [];
+    var accounts = [];
     var groupMemberRequire = 10000;
     async.waterfall([
             function(cb){
@@ -32,6 +33,26 @@ var countMemberGroups = function (cbG) {
                      groups = data;
                      cb();
                  });
+            },
+            function(cb){
+                 AccountsFB.find().then(function(data) {
+                    accounts = data;
+                    for (var i = 0; i < groups.length; i++) {
+                        var group =  groups[i];
+                        group.countMemberSystem = 0;
+                        for (var j = 0; j < accounts.length; j++) {
+                            var account = accounts[j];
+                            var find =  account.groups.find(function(ele){
+                                return ele == group.groupId;
+                            });
+                            if(find != undefined){
+                                group.countMemberSystem ++;
+                            }
+                        }
+                        Groups.update({groupId: group.groupId },{ countMemberSystem :  group.countMemberSystem }).exec(function afterwards(err, updated){})
+                    }
+                     cb();
+                 });  
             },
             function(cb){
                 async.eachOfSeries(groups, (item, key, cbEachOfSeries) => {

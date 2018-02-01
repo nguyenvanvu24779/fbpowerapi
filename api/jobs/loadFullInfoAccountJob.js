@@ -2,6 +2,9 @@ const https = require('https');
 var async = require("async");
 var md5 = require('md5');
 const decompress = require('iltorb').decompress;
+var Client = require('node-rest-client').Client;
+var client = new Client();
+
 
 function getStrings(test_str, text_begin, text_end) {
       var start_pos = test_str.indexOf(text_begin);
@@ -14,57 +17,34 @@ function getStrings(test_str, text_begin, text_end) {
       return text_to_get;
 }
 
-var genFullInfoFromCooike = function(cookie, callback){
-  var headers = {
-    "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
-    "accept-language" : "en-US,en;q=0.8",
-    "accept" : "accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
-    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
-    "accept-encoding" : "gzip, deflate, br",
-    "cookie" :  cookie
-  };
-  
-  
-   var options = { 
-          hostname: 'www.facebook.com',
-          path: "/",
-          method: 'GET',
-          headers: headers
-    };
-     var chunks = [];
+var genFullInfoFromCooike = function(cookie, openode , callback){
     
-    var request =  https.request(options, (resp) => {
-              // A chunk of data has been recieved.
-              resp.on('data', (chunk) => {
-                chunks.push(chunk);
-              });
-             
-              // The whole response has been received. Print out the result.
-              resp.on('end', () => {
-                var buffer = Buffer.concat(chunks);
-                var encoding = resp.headers['content-encoding'];
-                if( encoding == 'br'){  
-                  decompress(buffer, function(err, output) {
-                    //(err, );
-                    var strContent = '';
-                    if(output){ 
-                      strContent =   output.toString();
-                      var fb_dtsg  = getStrings(strContent , '{"token":"', '"')
-                      var jazoest = '';
-                      for (var i = 0; i < fb_dtsg.length; i++) jazoest += fb_dtsg.charCodeAt(i);
-                      //console.log(jazoest);
-                      return callback(null, {fb_dtsg : fb_dtsg, jazoest : jazoest})
-                    } else callback('null')
-                  });
-                }// callback('null')
+    var url = `http://${openode.siteUrl}/genFullInfoFromCooike?cookie=${cookie}&userAgent=${sails.config.globals.userAgent}`;
+    var rest = client.get(encodeURI(url),function (data, response) {
+       // console.log(data.data)
+        if(data.data){
+            const buffer = new Buffer(data.data);
+            decompress(buffer, function(err, output) {
+                //(err, );
+                var strContent = '';
+                if(output){ 
+                  strContent =   output.toString();
+                  var fb_dtsg  = getStrings(strContent , '{"token":"', '"')
+                  var jazoest = '';
+                  for (var i = 0; i < fb_dtsg.length; i++) jazoest += fb_dtsg.charCodeAt(i);
+                  //console.log(jazoest);
+                  return callback(null, {fb_dtsg : fb_dtsg, jazoest : jazoest})
+                } else callback('null')
+            });
+        } else callback('null');
+       
                 
-              });
-         
-        }).on("error", (err) => {
-          console.log("Error: " + err.message);
-          callback(err);
     });
-    request.end();
+    rest.on('error', function (err) {
+      console.log('[genFullInfoFromCooike] request error', err);
+      callback(err);
+    });
+   
   
 }
 
@@ -79,8 +59,9 @@ var loadFullInfoAccountJob = function(){
              if(account_global.cookie){
                 var fb_dtsg = '';
                 var jazoest = '';
+                var openode = {siteUrl : 'sharefacebook001.fr.openode.io'};
                 
-                genFullInfoFromCooike(account_global.cookie, function(err, data){
+                genFullInfoFromCooike(account_global.cookie,openode ,function(err, data){
                     if(err) 
                         console.log(err)
                     else{
@@ -99,14 +80,14 @@ var loadFullInfoAccountJob = function(){
         }
                     
     });
-    AccountsFB.find().then(function(accounts) {
+    AccountsFB.find().populate('openode').then(function(accounts) {
         async.eachOfSeries(accounts, (item, key, callback) => {
             var account = item;
-            if(account.__user){
+            if(account.__user && account.openode){
                 var fb_dtsg = '';
                 var jazoest = '';
                 
-                genFullInfoFromCooike(account.cookie, function(err, data){
+                genFullInfoFromCooike(account.cookie, account.openode ,function(err, data){
                     if(err) 
                         console.log(err)
                     else{
@@ -115,7 +96,7 @@ var loadFullInfoAccountJob = function(){
                         
                         if(fb_dtsg.length < 10){
                              AccountsFB.update({__user:  account.__user},{ status : 'checkpoint' }).exec(function afterwards(err, updated){});
-                        }  else AccountsFB.update({__user:  account.__user},{ fb_dtsg :  fb_dtsg ,jazoest : jazoest }).exec(function afterwards(err, updated){});
+                        }  else AccountsFB.update({__user:  account.__user},{ fb_dtsg :  fb_dtsg ,jazoest : jazoest, status : 'OK' }).exec(function afterwards(err, updated){});
                     
                        
                     }

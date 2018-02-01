@@ -117,6 +117,7 @@ var JoinAccounts2Groups = function(){
     var groupMemberRequire = 10000;
     var maxGroupPerAccount = 200;
     var timeJoinGroupPerAccount = [1,1];
+    var maxAccountSysPerGroup = 10;
     var nextRunAt = new Date();
     async.waterfall([
         function(cb){
@@ -150,10 +151,19 @@ var JoinAccounts2Groups = function(){
                 });  
         },
         function(cb){
-            Groups.find().then(function(data) {
+                Settings.findOne({
+                    key : 'maxAccountSysPerGroup'
+                  }).exec(function (err, finn){
+                    if (!err && finn ) {
+                        maxAccountSysPerGroup = parseInt(finn.value);
+                    }
+                    cb()
+                });  
+        },
+        function(cb){
+            Groups.find({countMemberSystem: {$lt : maxAccountSysPerGroup }}).then(function(data) {
                 groups = data;
                 cb()
-                 
             }).catch(function(err){
                 //....
                 cb(err);

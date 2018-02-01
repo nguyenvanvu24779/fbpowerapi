@@ -11,7 +11,9 @@ var post2GroupVideo = function(videoId ,groupId, message, account ,callback){
     var fb_dtsg = account.fb_dtsg;
     var jazoest = account.jazoest;
     
-    var rest = client.get(`http://${account.openode.siteUrl}/post2GroupVideo?groupId=${groupId}&message=${message}&c_user=${__user}&cookie=${cookie}&fb_dtsg=${fb_dtsg}&jazoest=${jazoest}&videoId=${videoId}&userAgent=${sails.config.globals.userAgent}`, function (data, response) {
+    var url = `http://${account.openode.siteUrl}/post2GroupVideo?groupId=${groupId}&message=${message}&c_user=${__user}&cookie=${cookie}&fb_dtsg=${fb_dtsg}&jazoest=${jazoest}&videoId=${videoId}&userAgent=${sails.config.globals.userAgent}`;
+    
+    var rest = client.get(encodeURI(url), function (data, response) {
         callback();      
     });
     rest.on('error', function (err) {
@@ -41,11 +43,14 @@ var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,
                 }).populate('openode').exec(function (err, finn){
                     if (!err && finn ) {
                         account  = finn;
-                        console.log('[shareLiveStream2GroupsJob] post2GroupVideo: ', account);
-                        if(account.openode)
-                            post2GroupVideo(videoId, item.shareGroupId, item.messageShare,account, function(err, data){
+                        console.log('[shareLiveStream2GroupsJob] post2GroupVideo: ', account.username);
+                        console.log('[shareLiveStream2GroupsJob] groupId: ',  item.shareGroupId);
+                        if(account.openode){
+                            ShareDetail.update({id: item.id },{ status : 'Processing' }).exec(function afterwards(err, updated){})
+                            post2GroupVideo(videoId, item.shareGroupId, item.messageShare,account, function(err){
                                 
                             });
+                        }
                     }
                     setTimeout(function(){cbEachOfSeries();}, shareDetails.length > 1 ?  (timeShareLimit*60/shareDetails.length)*1000 : 1000)  ;
                 }); 
@@ -54,7 +59,9 @@ var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,
             })
         }
     ], err => {
-        StreamVideo.update({id: streamVideoId },{ status : 'Done' }).exec(function afterwards(err, updated){})
+        setTimeout(function(){
+            Jobs.now('completeLiveStreamJob', { videoId : videoId , streamVideoId : streamVideoId, completeBy : 'System' });
+        }, 5000) ;
         if(err)
         {
             console.log('[shareLiveStream2GroupsJob] err:', err );

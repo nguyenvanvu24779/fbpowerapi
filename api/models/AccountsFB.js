@@ -17,7 +17,6 @@ module.exports = {
       collection: 'sharedetail',
       via: 'account'
     },
-    
     openode : {
          model: 'Openode'
     },

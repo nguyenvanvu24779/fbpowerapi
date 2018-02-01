@@ -5,8 +5,9 @@
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Controllers
  */
  
- var async = require("async");
+var async = require("async");
 const https = require('https');
+var pager = require('sails-pager');
 
 function diff_minutes(dt2, dt1) 
 {
@@ -314,7 +315,24 @@ module.exports = {
         sails.sockets.broadcast('root', {alert : 'SUCCESS :))'});
         
         res.json({msg : 'OK'})
-    }
+    },
+    
+    list: function(req, res) {
+        var perPage = req.query.per_page;
+        var currentPage = req.query.page;
+        var sortBy = req.query.sortBy;
+        if(sortBy == null || sortBy == undefined){
+            sortBy = 'createdAt';
+        }
+        var conditions = {active: true};
+ 
+        //Using Promises 
+        pager.paginate(StreamVideo, {}, currentPage, perPage, ['ShareDetail'], sortBy + ' DESC').then(function(records){
+            res.json(records);
+        }).catch(function(err) {
+            console.log(err);
+        });
+    },
 	
 };
 

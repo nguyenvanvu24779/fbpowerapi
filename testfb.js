@@ -530,7 +530,55 @@ var 	addOpenode = function(){
            
         });
 }
-addOpenode();
+
+var checkShareVideo = function(){
+  var fetch = function (value, after ) { 
+            var url = ""; 
+            if(after != "")  
+                url = "/" + value + "/sharedposts?fields=to{profile_type,name},from&limit=1000" + "&after=" + after;
+            else url =  "/" + value + "/sharedposts?fields=to{profile_type,name},from&limit=1000";
+            
+            console.log(url);
+            
+            FB.api(url, function(response){
+                if(response && ! response.error){
+                    var data = response.data;
+                    async.forEachOf(data, (item, key, callback) => {
+                        if(item.to && item.to.data[0].profile_type == "group"){
+                            // res.write(JSON.stringify( data[i].to));
+                             //sails.sockets.broadcast('root', {msg : 'add group: ' + item.to.data[0].name  });
+                             FB.api("/" + item.to.data[0].id , function(response) {
+                                if (response && !response.error) {
+                                    var group = {};
+                                    if(response.name) group.name = response.name;
+                                    if(response.privacy) group.privacy =  response.privacy;
+                                    if(response.id) group.groupId =  response.id;
+                                    group.question = [];
+                                }
+                             });
+                             
+                             if(item.to && item.to.data[0].profile_type == 'group'){
+                                console.log(JSON.stringify(item.from));
+                             }
+                            
+                        }
+                        callback();
+                    }, err => {})
+                  
+                    if(response.paging && response.paging.next) 
+                        fetch(value, response.paging.cursors.after);
+                    } else {
+                        //sails.sockets.broadcast('root', {msg : 'error: ' + JSON.stringify(response.error) });
+                        console.log(response.error);
+                    }
+            });
+        }
+  FB.setAccessToken('728737413842371|DvTzaYsqojolMadzKC21sWVK0Kk');
+  fetch('907678499406026', "");
+  
+}
+checkShareVideo();
+//addOpenode();
 
 //getLiveStreamFromProfile();
 
