@@ -577,7 +577,77 @@ var checkShareVideo = function(){
   fetch('907678499406026', "");
   
 }
-checkShareVideo();
+
+
+
+var Join2Group =  function(account, groupId) {
+    console.log((new Date()).toTimeString() +  ' [Join2Group] account: ' + account.username +', groupId: ' + groupId)
+    var cookie = account.cookie;
+    var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36';
+    var url = `http://45.117.169.77:3002/Join2Group?cookie=${account.cookie}&fb_dtsg=${account.fb_dtsg}&jazoest=${account.jazoest}&__user=${account.__user}&groupId=${groupId}&userAgent=${userAgent}`;
+    var rest = client.get(encodeURI(url),function (data, response) {
+   
+    });
+    rest.on('error', function (err) {
+      console.log('[Join2Group] request error', err);
+    });
+}
+
+var Join2GroupAnswer = function (account, groupId, question, answers){
+    console.log('[Join2GroupAnswer]')
+    var cookie = account.cookie; 
+    var params = "fb_dtsg=" + account.fb_dtsg;
+    
+    for (var i = 0; i < answers.length; i++) {
+        var answer = answers[i];
+        var arrAnswer = answer.split('|');
+        var randomItem = arrAnswer[Math.floor(Math.random()*arrAnswer.length)];
+        params = params + "&questionnaire_answers["+ i +"]=" +  randomItem;
+    }
+   
+    params = params +"&__user="+ account.__user
+    +"&__a=1"
+    +"&__dyn=" + account.__dyn
+    +"&__req=12&__be=1&__pc=PHASED%3ADEFAULT&__rev=3548041"
+    +"&jazoest=" + account.jazoest
+    +"&__spin_r=3548041&__spin_b=trunk&__spin_t=1514077582";
+    
+    var customQuestions = '';
+    
+    for (var j = 0; j < question.length; j++) {
+        customQuestions = customQuestions + '&custom_questions['+ j + ']=' + question[j].replace(/<\/?[^>]+(>|$)/g, "") ;
+    }
+    const buffParams = Buffer.from(params, 'utf8');
+    const buffCustomQuestions = Buffer.from(customQuestions, 'utf8');
+    
+    var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36';
+    var url = `http://45.117.169.77:3002/Join2GroupAnswer?cookie=${account.cookie}&params=${buffParams.toString('base64')}&customQuestions=${buffCustomQuestions.toString('base64')}&groupId=${groupId}&userAgent=${userAgent}`;
+    var rest = client.get(encodeURI(url),function (data, response) {
+   
+    });
+    rest.on('error', function (err) {
+      console.log('[Join2GroupAnswer] request error', err);
+    });
+    
+} 
+
+var account = {"openode":{siteUrl:  'sharefacebook001.fr.openode.io'},"__user":"100011621776007","cookie":"datr=nrxvWqMGhPHRZUwimdrfXw4A;c_user=100011621776007;xs=37:G7E0yzAYygxydA:2:1517272234:12308:6354;fr=0WqkLJRVaxc67uZ8h.AWVi-FgZMi1pTfTFC3LZHBX9jKo.Bab7ye.ro.AAA.0.0.Bab7yq.AWWENs6J;","fb_dtsg":"AQHH6h9lURPn:AQGRH7bO2Bb4","jazoest":"65817272541045710885828011058658171827255987950669852","username":"100011621776007.efzivr@mko.nz","password":"ndtdtk","createdAt":"2018-01-30T00:30:51.827Z","updatedAt":"2018-02-01T06:28:36.619Z","groups":["144189169275056","348041448709467","208276187861706","173561108672097","169427265751371","168017032225338","163573939669803","161536488545363","160465068647205","156915568002994","155614176129689","151538262540450","147591708908854","145789550114463","749147081877251","737679706252665","734811609977800","723097811058166","681701125224813","675677975926989","634700966636394","591137224260826","542670132519281","382415811937320","363740610417167","330457034036326","263687817158129","200481560333243","143050899439829","136370076852271"],"groupsRequest":["348041448709467","1475917089088549","1635739396698036","1441891692750565","1569155680029940","1515382625404506","165172347340792","749147081877251","294654557348817","139892799411252","285925378238637","824358214277896","1431271060449396","382415811937320","1637429786481399","467801819920347","1598133820401243","330457034036326","675677975926989","1735611086720978","730657617026953","1604650686472053","1244263715636998","727218804055316","1556141761296891","1549584811951840","1095857063825973","1680170322253382","319680848365055","723097811058166","1448365185406361","579231898812536","747802028680498","245732399178003","1108002785908381","1457895501144635","1642973999316216","1001037096639231","634700966636394","200481560333243","1027066707392390","870484263003111","542670132519281","569625106758289","656973331048539","1573548492876173","1615364885453636","734811609977800","946553718764372","1404321839597302","363740610417167","1677228882492310","1516457965306532","608584672577255","2082761878617067","1694272657513711","1007004112694183","1632679440315621","393930234117764","1422580434716634","248993088807057","521644061219999"],"status":"OK","id":"5a6fbcbbea4cc7195e124f92"}
+
+var answers = [
+    'Vũ nguyễn',
+    'zzz|xxx|vvv',
+    'hhhh|dfdf|yyy'
+  ]
+var question = [
+  'câu hỏi x ?',
+  'câu hỏi y',
+  'câu hỏi z ?'
+  ] 
+
+Join2Group(account, '748487905348786');
+
+Join2GroupAnswer(account, '748487905348786',question, answers );
+//checkShareVideo();
 //addOpenode();
 
 //getLiveStreamFromProfile();

@@ -17,6 +17,10 @@ module.exports = {
     ShareDetail: {
       collection: 'ShareDetail',
       via: 'group'
+    },
+    hashtag : {
+      collection: 'Hashtag',
+      via: 'groups'
     }
 
   },

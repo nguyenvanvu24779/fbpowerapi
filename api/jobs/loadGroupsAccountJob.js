@@ -16,7 +16,8 @@ var loadGroupsAccount = function() {
               var url = `http://${account.openode.siteUrl}/countGroupsAccount?cookie=${account.cookie}&userAgent=${sails.config.globals.userAgent}`;
               var rest = client.get(encodeURI(url),function (data, response) {
                 console.log(data);
-                  AccountsFB.update({__user: account.__user},{ groups:data.data }).exec(function afterwards(err, updated){
+                if(data.data){
+                   AccountsFB.update({__user: account.__user},{ groups:data.data }).exec(function afterwards(err, updated){
                     if (err) {
                       // handle error here- e.g. `res.serverError(err);`
                       console.log(err);
@@ -25,8 +26,11 @@ var loadGroupsAccount = function() {
                     }
                     
                     console.log('Updated user to have name ' + updated[0].username);
-                    setTimeout(function(){callback()}, 15000) ;
+                    
                   });
+                }
+                setTimeout(function(){callback()}, 15000) ;
+                 
               });
               rest.on('error', function (err) {
                   console.log('[post2GroupVideo] request error', err);

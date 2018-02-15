@@ -1,5 +1,7 @@
 const https = require('https');
 var async = require("async");
+var Client = require('node-rest-client').Client;
+var client = new Client();
 
 function diff_minutes(dt2, dt1) 
 {
@@ -11,47 +13,16 @@ function diff_minutes(dt2, dt1)
 }
 
 var Join2Group =  function(account, groupId) {
-    console.log((new Date()).toTimeString() +  ' [Join2Group] account: ' + account.username )
+    console.log((new Date()).toTimeString() +  ' [Join2Group] account: ' + account.username +', groupId: ' + groupId)
     var cookie = account.cookie;
-    var params = "ref=group_jump_header"
-    +"&group_id=" + groupId
-    +"&client_custom_questions=1"
-    +"&__user=" + account.__user
-    +"&__a=1"
-    +"&__dyn=" + account.__dyn
-    +"&__req=q&__be=1&__pc=PHASED%3ADEFAULT&__rev=3548041"
-    +"&fb_dtsg=" + account.fb_dtsg
-    +"&jazoest=" + account.jazoest
-    +"&__spin_r=3548041&__spin_b=trunk&__spin_t=1514077825";
-    
-    var options = { 
-                hostname: 'www.facebook.com',
-                path: "/ajax/groups/membership/r2j.php?dpr=1",
-                method: 'POST',
-                headers: {'Cookie':  cookie,
-                          'Content-Type': 'application/x-www-form-urlencoded',
-                          'user-agent' : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36"
-                }
-    };
-    var request =  https.request(options, (resp) => {
-          var data = '';
-         
-          // A chunk of data has been recieved.
-          resp.on('data', (chunk) => {
-            data += chunk;
-          });
-         
-          // The whole response has been received. Print out the result.
-          resp.on('end', () => {
-           // console.log('end' + data);
-          });
-     
-    }).on("error", (err) => {
-      console.log("Error: " + err.message);
+    var userAgent = sails.config.globals.userAgent;
+    var url = `http://${account.openode.siteUrl}/Join2Group?cookie=${account.cookie}&fb_dtsg=${account.fb_dtsg}&jazoest=${account.jazoest}&__user=${account.__user}&groupId=${groupId}&userAgent=${userAgent}`;
+    var rest = client.get(encodeURI(url),function (data, response) {
+   
     });
-    
-    request.write(params);
-    request.end();
+    rest.on('error', function (err) {
+      console.log('[Join2Group] request error', err);
+    });
 }
 
 var Join2GroupAnswer = function (account, groupId, question, answers){
@@ -78,36 +49,17 @@ var Join2GroupAnswer = function (account, groupId, question, answers){
     for (var j = 0; j < question.length; j++) {
         customQuestions = customQuestions + '&custom_questions['+ j + ']=' + question[j].replace(/<\/?[^>]+(>|$)/g, "") ;
     }
+    const buffParams = Buffer.from(params, 'utf8');
+    const buffCustomQuestions = Buffer.from(customQuestions, 'utf8');
     
-    var options = { 
-                hostname: 'www.facebook.com',
-                path: "/groups/membership_criteria_answer/save/?group_id="+ groupId + "&dpr=1" +   encodeURI(customQuestions),
-                method: 'POST',
-                headers: {'Cookie':  cookie,
-                          'Content-Type': 'application/x-www-form-urlencoded',
-                          'user-agent' : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36"
-                }
-    };
-   // console.log('[Join2GroupAnswer] options:', options )
-    var request =  https.request(options, (resp) => {
-          var data = '';
-         
-          // A chunk of data has been recieved.
-          resp.on('data', (chunk) => {
-            data += chunk;
-          });
-         
-          // The whole response has been received. Print out the result.
-          resp.on('end', () => {
-           // console.log('end' + data);
-          });
-     
-    }).on("error", (err) => {
-      console.log("Error: " + err.message);
+    var userAgent = sails.config.globals.userAgent;
+    var url = `http://${account.openode.siteUrl}/Join2GroupAnswer?cookie=${account.cookie}&params=${buffParams.toString('base64')}&customQuestions=${buffCustomQuestions.toString('base64')}&groupId=${groupId}&userAgent=${userAgent}`;
+    var rest = client.get(encodeURI(url),function (data, response) {
+   
     });
-    // console.log('[Join2GroupAnswer] params', params );
-    request.write(encodeURI(params));
-    request.end();
+    rest.on('error', function (err) {
+      console.log('[Join2GroupAnswer] request error', err);
+    });
     
 } 
 
@@ -181,7 +133,7 @@ var JoinAccounts2Groups = function(){
             });
         },
         function(cb){
-            AccountsFB.find().then(function(accounts) {
+            AccountsFB.find().populate('openode').then(function(accounts) {
                 async.each(accounts, (item, callback) => {
                     var account = item;
                     if(account.__user == undefined || account.__user == null ){
@@ -227,6 +179,9 @@ var JoinAccounts2Groups = function(){
                             if(findAcc != undefined)
                                return callbackGroups();
                                // return callback('joined');
+                        }
+                        if(account.openode == undefined){
+                             return callbackGroups();
                         }
                 
                         if(account.groupsRequest && account.groupsRequest.length > 0){

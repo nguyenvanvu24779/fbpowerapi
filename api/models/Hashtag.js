@@ -8,7 +8,14 @@
 module.exports = {
 
   attributes: {
-
+    hashtag: {
+      type: 'string',
+      unique: true
+    },
+    groups : {
+      collection: 'Groups',
+      via: 'hashtag'
+    }
   }
 };
 

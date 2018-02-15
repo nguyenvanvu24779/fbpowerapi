@@ -256,6 +256,46 @@ module.exports = {
         });
     },
     
+    addGroupHashtag : function(req, res){
+        var hashtagId = req.query.hashtagId;
+        var groupId = req.query.groupId;
+        Groups.findOne(groupId).exec(function(err, group) {
+          if(err) // handle error
+          {
+            return  res.json({err : err});
+          }
+        
+          // Queue up a record to be inserted into the join table
+          group.hashtag.add([ hashtagId ]);
+        
+          // Save the user, creating the new pet and associations in the join table
+          group.save(function(err) {});
+          
+          res.json({message : 'ok'});
+          
+        });
+    },
+    
+     removeGroupHashtag : function(req, res){
+        var hashtagId = req.query.hashtagId;
+        var groupId = req.query.groupId;
+        Groups.findOne(groupId).exec(function(err, group) {
+          if(err) // handle error
+          {
+            return  res.json({err : err});
+          }
+        
+          // Queue up a record to be inserted into the join table
+          group.hashtag.remove(hashtagId);
+        
+          // Save the user, creating the new pet and associations in the join table
+          group.save(function(err) {});
+          
+          res.json({message : 'ok'});
+          
+        });
+    },
+    
     list: function(req, res) {
         var perPage = req.query.per_page;
         var currentPage = req.query.page;
@@ -266,7 +306,7 @@ module.exports = {
         var conditions = {active: true};
  
         //Using Promises 
-        pager.paginate(Groups, {}, currentPage, perPage, [], sortBy + ' DESC').then(function(records){
+        pager.paginate(Groups, {}, currentPage, perPage, ['hashtag'], sortBy + ' DESC').then(function(records){
             res.json(records);
         }).catch(function(err) {
             console.log(err);
