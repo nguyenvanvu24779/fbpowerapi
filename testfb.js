@@ -435,7 +435,7 @@ var getStatusVideo = function(){
   
    var options = { 
           hostname: 'www.facebook.com',
-          path: "/webgraphql/query/?doc_id=1756845024340619&variables=%7B%22video_id%22%3A%221178824402219994f%22%7D&dpr=1",
+          path: "/webgraphql/query/?doc_id=1756845024340619&variables=%7B%22video_id%22%3A%221481498761959394%22%7D&dpr=1",
           method: 'POST',
           headers: headers
     };
@@ -909,4 +909,140 @@ var post2GroupVideo1 = function( ){
     });
 }
 
-post2GroupVideo1();
+//post2GroupVideo1();
+
+
+var getCursorViewShare = function ( videoId, account, callback){
+  var headers = {
+   // "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+    "accept-language" : "en-US,en;q=0.9",
+    "accept" : "*/*",
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+    "accept-encoding" : "gzip, deflate, br",
+    "cookie" : account.cookie
+  };
+  
+  
+  
+  
+   var options = { 
+          hostname: 'www.facebook.com',
+          path: "/ajax/shares/view?target_fbid="+ videoId+"&av="+ account.__user +"&dpr=1&__asyncDialog=7"
+          + "&__user=" + account.__user
+          + "&__a=1&__req=223&__be=1&__pc=PHASED%3ADEFAULT&__rev=3658517&__spin_r=3658517&__spin_b=trunk&__spin_t=1518977456&ft\[tn\]=\]FHHH-R-R&ft\[top_level_post_id\]=773941866136723&ft\[qid\]=6523967144399196030&ft\[mf_story_key\]=773941866136723&ft\[tl_objid\]=773941866136723&ft\[src\]=10&ft\[fbfeed_location\]=2",
+          method: 'GET',
+          headers: headers
+    };
+    var chunks = [];
+    
+    var request =  https.request(options, (resp) => {
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                chunks.push(chunk);
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                var cursor = '';
+                var buffer = Buffer.concat(chunks);
+                var encoding = resp.headers['content-encoding'];
+                if( encoding == 'br'){  
+                  decompress(buffer, function(err, output) {
+                    if(err) return callback(err);
+                    var strContent = '';
+                    if(output){ 
+                        strContent =   output.toString();
+                        if(strContent.includes('100004198965094')){
+                          console.log('have share');
+                        }
+                        var index = strContent.indexOf('\"cursor\":');
+                        strContent = strContent.substring(index + 10  );
+                        index = strContent.indexOf('\"}');
+                        cursor  = strContent.substring(0, index);
+                        console.log(cursor);
+                        
+                    }
+                    callback(null,cursor);
+                  });
+                }
+              });
+         
+        }).on("error", (err) => {
+          callback(err);
+          console.log("Error: " + err.message);
+    });
+    request.end();
+}
+
+
+var ResharesPagelet = function (videoId , account ,cursor){
+  var headers = {
+   // "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+    "accept-language" : "en-US,en;q=0.9",
+    "accept" : "*/*",
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+    "accept-encoding" : "gzip, deflate, br",
+    "cookie" :   account.cookie
+  };
+  
+  
+ // var cursor = 'AQHR4UU1sPBOyOS6l_WXiTR4is7ws0I2role60nLlnri-SNKKth6GVWxVDVnWzRNV1_koJE2d3V3elIwdmUEKxmlEw';
+  
+   var options = { 
+          hostname: 'www.facebook.com',
+          path: "/ajax/pagelet/generic.php/ResharesPagelet?dpr=1&data=%7B%22target_fbid%22%3A" + videoId +"%2C%22cursor%22%3A%22"
+          + cursor+ "%22%2C%22pager_fired_on_init%22%3Atrue%7D"
+          + "&__user="  + account.__user
+          + "&__a=1"
+          + "&__req=2ci&__be=1&__pc=PHASED%3ADEFAULT&__rev=3658517&__spin_r=3658517&__spin_b=trunk&__spin_t=1518977456",
+          method: 'GET',
+          headers: headers
+    };
+    var chunks = [];
+    
+    var request =  https.request(options, (resp) => {
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                chunks.push(chunk);
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                var cursor = '';
+                var buffer = Buffer.concat(chunks);
+                var encoding = resp.headers['content-encoding'];
+                if( encoding == 'br'){  
+                  decompress(buffer, function(err, output) {
+                    //(err, );
+                    var strContent = '';
+                    if(output){ 
+                        strContent =   output.toString();
+                        if(strContent.includes('100004198965094')){
+                          console.log('have share');
+                        }
+                        var index = strContent.indexOf('\"cursor\":');
+                        if(index < 0) return;
+                        strContent = strContent.substring(index + 10  );
+                        index = strContent.indexOf('\"}');
+                        cursor  = strContent.substring(0, index);
+                        console.log(cursor);
+                        if(cursor.length > 0){
+                          ResharesPagelet(videoId, account,cursor)
+                        }
+                      }
+                  });
+                }
+              });
+         
+        }).on("error", (err) => {
+          console.log("Error: " + err.message);
+    });
+    request.end();
+}
+
+var account = {"__user":"100007412476717","cookie":"datr=WTxPWlGiDrmPUYqGnyzTYZuG;c_user=100007412476717;xs=1:0pKez1U-bF1BTw:2:1515142245:14829:6215;fr=0Bn6yvgYQKtwgqaEK.AWUcMGwp3ZhIj5_PCRxK7vZzISM.BaTzxZ.M8.AAA.0.0.BaTzxl.AWWiUVix;","fb_dtsg":"AQGHmAYd7yRq:AQEOdMZEMp8-","jazoest":"65817172109658910055121821135865816979100779069771125645","username":"100007412476717.zjuktu@mko.nz","password":"ndtdtk1","createdAt":"2018-01-05T08:52:52.128Z","updatedAt":"2018-01-05T08:52:52.128Z","id":"5a4f3ce4d13cf9350145d91f"}
+
+getCursorViewShare('10155526388683253', account,function(err, cursor){
+  if(err) return console.log(err);
+  ResharesPagelet('10155526388683253', account ,cursor);
+});

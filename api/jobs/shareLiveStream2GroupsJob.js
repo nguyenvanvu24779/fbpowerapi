@@ -62,7 +62,7 @@ var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,
     ], err => {
         setTimeout(function(){
             Jobs.now('completeLiveStreamJob', { videoId : videoId , streamVideoId : streamVideoId, completeBy : 'System' });
-        }, 5000) ;
+        }, 1000 * 60 * 5 ) ;
         if(err)
         {
             console.log('[shareLiveStream2GroupsJob] err:', err );
