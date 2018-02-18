@@ -190,7 +190,7 @@ var post2GroupVideo = function(videoId ,groupId, message, account ,callback){
       request.write(urlParameters);
       request.end();
 }
-var shareLiveStream2GroupsJob = function(url, sharesAmount, timeShareLimit , callback){
+var shareLiveStream2GroupsJob = function(url, sharesAmount, timeShareLimit , note, callback){
     var groups = [];
     var accounts = [];
     var sharePerAccount = [1, 3];
@@ -247,15 +247,15 @@ var shareLiveStream2GroupsJob = function(url, sharesAmount, timeShareLimit , cal
             })
         },
         function(callbackWaterfall){
-            StreamVideo.create({url : url,sharesAmount : sharesAmount, timeShareLimit : timeShareLimit, status : 'Init' }).exec(function createCB(err, created){
+            StreamVideo.create({url : url,sharesAmount : sharesAmount, timeShareLimit : timeShareLimit, status : 'Init' , note : note}).exec(function createCB(err, created){
                 if(err)
                     return callbackWaterfall(err);
                 else callbackWaterfall(null, created.id);
             });   
         },
         function(streamVideoId, callbackWaterfall){
-
-            for (var i = 0; i < accounts.length - sharesAmount ; i++) {
+            var accountsLength = accounts.length;
+            for (var i = 0; i < accountsLength - sharesAmount ; i++) {
                 var index  = Math.floor(Math.random()*accounts.length);
                 accounts.splice(index, 1);
             }
@@ -298,8 +298,9 @@ module.exports = {
     createLiveStream : function(req, res){
         var sharesAmount = req.query.sharesAmount;
         var timeShareLimit = req.query.timeShareLimit;
+        var note = req.query.note;
         var url = req.query.url;
-        shareLiveStream2GroupsJob(url, sharesAmount, timeShareLimit, function(err){
+        shareLiveStream2GroupsJob(url, sharesAmount, timeShareLimit, note,  function(err){
             if(err){
                 res.json(500, { error: err })
                 sails.sockets.broadcast('root', {alert : "ERROR, " + err});

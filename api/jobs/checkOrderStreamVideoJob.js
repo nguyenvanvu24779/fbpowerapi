@@ -12,6 +12,67 @@ function diff_minutes(dt2, dt1)
   
 }
 
+var getLiveStreamFromFanpage = function(cookie, fanpageName, callback){
+  var headers = {
+   // "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+    "accept-language" : "en-US,en;q=0.9",
+    "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+    "accept-encoding" : "gzip, deflate, br",
+    "cookie" : cookie     
+  };
+  
+  
+   var options = { 
+          hostname: 'www.facebook.com',
+          path: "/" + fanpageName + "/videos/",
+          method: 'GET',
+          headers: headers
+    };
+     var chunks = [];
+    
+    var request =  https.request(options, (resp) => {
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                chunks.push(chunk);
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                var buffer = Buffer.concat(chunks);
+                var encoding = resp.headers['content-encoding'];
+                var videoId = '';
+                if( encoding == 'br'){  
+                  decompress(buffer, function(err, output) {
+                    //(err, );
+                    var strContent = '';
+                    if(output){ 
+                        strContent =   output.toString();
+                        //console.log(strContent)
+                        if(strContent.includes('Now Live')){
+                            var index = strContent.indexOf('Now Live');
+                            strContent = strContent.substring(index);
+                            index = strContent.indexOf('\/videos\/');
+                            strContent = strContent.substring(index + 8, index + 8 + 16);
+                            if(!isNaN(strContent)){
+                                console.log(strContent);
+                                videoId =  strContent;
+                            }
+                        
+                        }
+                    }
+                    callback(null, videoId);
+                  });
+                }
+              });
+         
+        }).on("error", (err) => {
+            callback(err);
+          console.log("Error: " + err.message);
+    });
+    request.end();
+}
+
 
 var getLiveStreamFromProfile = function(cookie, profileId, callback){
   var headers = {
@@ -73,6 +134,103 @@ var getLiveStreamFromProfile = function(cookie, profileId, callback){
     request.end();
 }
 
+
+var getTypeUrl = function(name, cookie, callback){
+  var headers = {
+   // "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+    "accept-language" : "en-US,en;q=0.9",
+    "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+    "accept-encoding" : "gzip, deflate, br",
+    "cookie" :  cookie
+  };
+  
+  
+   var options = { 
+          hostname: 'www.facebook.com',
+          path: "/"+ name,
+          method: 'GET',
+          headers: headers
+    };
+     var chunks = [];
+    
+    var request =  https.request(options, (resp) => {
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                chunks.push(chunk);
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                var buffer = Buffer.concat(chunks);
+                var encoding = resp.headers['content-encoding'];
+                
+                if( encoding == 'br'){  
+                  decompress(buffer, function(err, output) {
+                    if(err) return callback(err);
+                    var strContent = '';
+                    if(output){ 
+                      strContent =   output.toString();
+                      //console.log(strContent)
+                      if(strContent.includes('\"text\":\"Create Page\"')){
+                        console.log('isPage');
+                        return callback(null, 'Page')
+                      } else if(strContent.includes('https:\/\/www.facebook.com\/' + name + '\/friends')){
+                        console.log('isProfile');
+                        return callback(null,'Profile');
+                      }
+                    }
+                    return callback('error');
+                  });
+                }
+              });
+         
+        }).on("error", (err) => {
+            callback(err)
+          console.log("Error: " + err.message);
+    });
+    request.end();
+}
+
+var getLiveStreamFromUrl =  function(cookie, url, callback){
+    if(!url.includes('https://www.facebook.com')){
+        return callback('url error');
+    }
+    var videoId = '';
+    if(url.includes('\/videos\/')){
+        var index = url.indexOf('\/videos\/');
+        videoId =  url.substring(index + 8, index + 8 + 16);
+        console.log(videoId);
+        return callback(null, videoId);
+    }
+    else if(url.includes('profile.php?id=')){
+        var profileId = '';
+        var index  = url.indexOf('profile.php?id=');
+        profileId =  url.substring(index + 15, index + 15 + 15);
+        getLiveStreamFromProfile(cookie, profileId, function(err, videoId) {
+            if(err) return callback(err);
+            return callback(null, videoId);
+        } );
+    } else {
+        var index  = url.indexOf('facebook.com\/');
+        var name = url.substring(index + 13);
+        name =  name.replace(/\//g, "");
+        getTypeUrl(name,cookie, function(err, type ){
+            if(type == 'Profile'){
+                getLiveStreamFromProfile(cookie, name, function(err, videoId) {
+                    if(err) return callback(err);
+                    return callback(null, videoId);
+                });
+            } else if(type == 'Page'){
+                getLiveStreamFromFanpage(cookie, name, function(err, videoId){
+                    if(err) return callback(err);
+                    return callback(null, videoId);
+                })
+            } else callback('error url');
+        })
+    }
+}
+
 var checkOrderStreamVideoJob = function(callback){
     var account_global = {}
     async.waterfall([
@@ -93,11 +251,13 @@ var checkOrderStreamVideoJob = function(callback){
                     if(item.status != 'Init'){
                         return cbEachOfSeries();
                     }
-                    const myURL = new URL(item.url);
-                    var profileId = myURL.pathname.replace(/\//g,'' )
-                    getLiveStreamFromProfile(account_global.cookie, profileId , function(err, videoId){
-                        if(err) return cbEachOfSeries();
-                        if(videoId.length > 0){
+                    //const myURL = new URL(item.url);
+                    //var profileId = myURL.pathname.replace(/\//g,'' )
+                    getLiveStreamFromUrl(account_global.cookie, item.url , function(err, videoId){
+                        if(err) {
+                            return cbEachOfSeries();
+                        }
+                        if(videoId.length > 0 && !isNaN(parseInt(videoId)) ){
                             console.log('Start Share Stream...')
                             Jobs.now('shareLiveStream2GroupsJob', { videoId : videoId , streamVideoId : item.id, timeShareLimit : item.timeShareLimit})
                             StreamVideo.update({id: item.id },{ status : 'Processing' , videoId : videoId }).exec(function afterwards(err, updated){})

@@ -347,7 +347,12 @@ var genFullInfoFromCooike = function(cookie){
               // The whole response has been received. Print out the result.
               resp.on('end', () => {
                 var buffer = Buffer.concat(chunks);
+               
                 var encoding = resp.headers['content-encoding'];
+                 console.log(resp.headers.location)
+                 if(resp.headers.location && resp.headers.location.includes('checkpoint')){
+                   console.log('checkpoint')
+                 }
                 if( encoding == 'br'){  
                   decompress(buffer, function(err, output) {
                     //(err, );
@@ -357,7 +362,7 @@ var genFullInfoFromCooike = function(cookie){
                       var fb_dtsg  = getStrings(strContent , '{"token":"', '"')
                       var jazoest = '';
                       for (var i = 0; i < fb_dtsg.length; i++) jazoest += fb_dtsg.charCodeAt(i);
-                      console.log(jazoest);
+                      console.log(fb_dtsg);
                       
                     }
                   });
@@ -415,23 +420,31 @@ var genCookieFromAccount = function(username , password){
 }
 
 
+
 var getStatusVideo = function(){
    var headers = {
    // "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
     "accept-language" : "en-US,en;q=0.9",
-    "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "accept" : "*/*",
     "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
-    "accept-encoding" : "gzip, deflate, br",
-    "cookie" :  "datr=PfgPVtLPN6FahZqftRH08vKi; sb=RMDnV_Cf5qCLsNpFUiFfQ0Xj; c_user=100003547953606; xs=12%3AwoI5UXh_p31PUg%3A2%3A1505392771%3A4035%3A6192; fr=0bjlZrd4hpXNhJ5bE.AWVaxGWl2Ejd68KboK8xUdaBRlc.BZulQb.Rp.Fpa.0.0.BaXFA1.AWWZQ1NO; wd=822x672; act=1516002241560%2F2; presence=EDvF3EtimeF1516002253EuserFA21B03547953606A2EstateFDt3F_5bDiFA2user_3a1B02635509719A2EoF1EfF1C_5dEutc3F1516002243519G516002253377CEchFDp_5f1B03547953606F23CC"
+    "accept-encoding" : "br",
+    "content-type" : ' application/x-www-form-urlencoded',
+    "cookie" :  "datr=WTxPWlGiDrmPUYqGnyzTYZuG;c_user=100007412476717;xs=1:0pKez1U-bF1BTw:2:1515142245:14829:6215;fr=0Bn6yvgYQKtwgqaEK.AWUcMGwp3ZhIj5_PCRxK7vZzISM.BaTzxZ.M8.AAA.0.0.BaTzxl.AWWiUVix;"
   };
   
   
    var options = { 
           hostname: 'www.facebook.com',
-          path: "/ChinaGlobalTVNetwork/videos/2091900450850764/",
-          method: 'GET',
+          path: "/webgraphql/query/?doc_id=1756845024340619&variables=%7B%22video_id%22%3A%221178824402219994f%22%7D&dpr=1",
+          method: 'POST',
           headers: headers
     };
+    
+    var urlParameters = '__user=100007412476717&__a=1' 
+     +  '&__req=fz&__be=1&__pc=PHASED%3ADEFAULT&__rev=3658063'
+     +  '&fb_dtsg=AQGCMfwYKFiZ:AQFbcP_YdNOS'
+     +  '&jazoest=658171677710211989757010590586581709899809589100787983' 
+     +  '&__spin_r=3658063&__spin_b=trunk&__spin_t=1518875587';
      var chunks = [];
     
     var request =  https.request(options, (resp) => {
@@ -450,7 +463,8 @@ var getStatusVideo = function(){
                     var strContent = '';
                     if(output){ 
                       strContent =   output.toString();
-                      console.log(strContent.includes('<span class=\"_2wrk\">LIVE<\/span>'));
+                      console.log(strContent);
+                      console.log(strContent.includes('LIVE'));
                       
                     }
                   });
@@ -460,6 +474,7 @@ var getStatusVideo = function(){
         }).on("error", (err) => {
           console.log("Error: " + err.message);
     });
+    request.write(urlParameters);
     request.end();
   
 }
@@ -477,7 +492,7 @@ var getLiveStreamFromProfile = function(){
   
    var options = { 
           hostname: 'www.facebook.com',
-          path: "/ervis.likmeta/videos_by",
+          path: "/100010270212602/videos_by",
           method: 'GET',
           headers: headers
     };
@@ -643,14 +658,135 @@ var question = [
   'câu hỏi y',
   'câu hỏi z ?'
   ] 
+  
 
-Join2Group(account, '748487905348786');
 
-Join2GroupAnswer(account, '748487905348786',question, answers );
+var getLiveStreamFromFanpage = function(){
+  var headers = {
+   // "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+    "accept-language" : "en-US,en;q=0.9",
+    "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+    "accept-encoding" : "gzip, deflate, br",
+    "cookie" :  "datr=PfgPVtLPN6FahZqftRH08vKi; sb=RMDnV_Cf5qCLsNpFUiFfQ0Xj; c_user=100003547953606; xs=12%3AwoI5UXh_p31PUg%3A2%3A1505392771%3A4035%3A6192; wd=835x672; act=1518889677115%2F1; fr=0bjlZrd4hpXNhJ5bE.AWUmBThQo2vloFpMOkALx2Y5XWg.BZulQb.Rp.FqD.0.0.BaiGv5.AWXbC-GM; presence=EDvF3EtimeF1518890605EuserFA21B03547953606A2EstateFDt3F_5bDiFA2user_3a1B10909594233A2EoF1EfF1C_5dEutc3F1518889677324G518890605160CEchFDp_5f1B03547953606F493CC"   
+  };
+  
+  
+   var options = { 
+          hostname: 'www.facebook.com',
+          path: "/VananhofficialPage/videos/",
+          method: 'GET',
+          headers: headers
+    };
+     var chunks = [];
+    
+    var request =  https.request(options, (resp) => {
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                chunks.push(chunk);
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                var buffer = Buffer.concat(chunks);
+                var encoding = resp.headers['content-encoding'];
+                if( encoding == 'br'){  
+                  decompress(buffer, function(err, output) {
+                    //(err, );
+                    var strContent = '';
+                    if(output){ 
+                      strContent =   output.toString();
+                      //console.log(strContent)
+                      if(strContent.includes('Now Live')){
+                        var index = strContent.indexOf('Now Live');
+                        strContent = strContent.substring(index);
+                        index = strContent.indexOf('\/videos\/');
+                        strContent = strContent.substring(index + 8, index + 8 + 16);
+                        if(!isNaN(strContent))
+                         console.log(strContent)
+                      }
+                      //console.log(strContent);
+                      
+                    }
+                  });
+                }
+              });
+         
+        }).on("error", (err) => {
+          console.log("Error: " + err.message);
+    });
+    request.end();
+}
+
+var getTypeUrl = function(){
+  var headers = {
+   // "accept-charset" : "ISO-8859-1,utf-8;q=0.7,*;q=0.3",
+    "accept-language" : "en-US,en;q=0.9",
+    "accept" : "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    "user-agent" : "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.101 Safari/537.36",
+    "accept-encoding" : "gzip, deflate, br",
+    "cookie" :  "datr=PfgPVtLPN6FahZqftRH08vKi; sb=RMDnV_Cf5qCLsNpFUiFfQ0Xj; c_user=100003547953606; xs=12%3AwoI5UXh_p31PUg%3A2%3A1505392771%3A4035%3A6192; wd=835x672; act=1518889677115%2F1; fr=0bjlZrd4hpXNhJ5bE.AWUmBThQo2vloFpMOkALx2Y5XWg.BZulQb.Rp.FqD.0.0.BaiGv5.AWXbC-GM; presence=EDvF3EtimeF1518890605EuserFA21B03547953606A2EstateFDt3F_5bDiFA2user_3a1B10909594233A2EoF1EfF1C_5dEutc3F1518889677324G518890605160CEchFDp_5f1B03547953606F493CC"   
+  };
+  
+  var name = 'VananhofficialPage';
+  
+  
+   var options = { 
+          hostname: 'www.facebook.com',
+          path: "/"+ name,
+          method: 'GET',
+          headers: headers
+    };
+     var chunks = [];
+    
+    var request =  https.request(options, (resp) => {
+              // A chunk of data has been recieved.
+              resp.on('data', (chunk) => {
+                chunks.push(chunk);
+              });
+             
+              // The whole response has been received. Print out the result.
+              resp.on('end', () => {
+                var buffer = Buffer.concat(chunks);
+                var encoding = resp.headers['content-encoding'];
+                
+                if( encoding == 'br'){  
+                  decompress(buffer, function(err, output) {
+                    //(err, );
+                    var strContent = '';
+                    if(output){ 
+                      strContent =   output.toString();
+                      console.log(strContent)
+                      if(strContent.includes('\"text\":\"Create Page\"')){
+                       
+                        console.log('isPage');
+                      } else if(strContent.includes('https:\/\/www.facebook.com\/' + name + '\/friends')){
+                        console.log('isProfile');
+                      }
+                    
+                      
+                    }
+                  });
+                }
+              });
+         
+        }).on("error", (err) => {
+          console.log("Error: " + err.message);
+    });
+    request.end();
+}
+
+//getTypeUrl();
+//Join2Group(account, '748487905348786');
+
+//Join2GroupAnswer(account, '748487905348786',question, answers );
 //checkShareVideo();
 //addOpenode();
 
 //getLiveStreamFromProfile();
+
+//getLiveStreamFromFanpage()
+
 
 //getStatusVideo();
 //genCookieFromAccount("zexop@tinoza.org", "Haiyen2202")
@@ -665,3 +801,112 @@ Join2GroupAnswer(account, '748487905348786',question, answers );
 
 
 //testJoin2GroupAnswer();
+
+
+//genFullInfoFromCooike('datr=ny5PWiq0jq2_16FgcBycDXQl;c_user=100008251508664;xs=35:Vkjf5ysqXrO-5w:2:1515138767:434:6368;fr=0uDhjFAmhVhPFOWjv.AWVZQo7bOmOSNEJjYZ5HG0BRyVk.BaTy6f.iJ.AAA.0.0.BaTy7P.AWWqObf3;');
+
+
+var post2GroupVideo = function () {
+    var groupId = '748487905348786';
+    var message = 'test';
+    var c_user =  '100003547953606';
+    var cookie = 'datr=PfgPVtLPN6FahZqftRH08vKi; sb=RMDnV_Cf5qCLsNpFUiFfQ0Xj; c_user=100003547953606; xs=12%3AwoI5UXh_p31PUg%3A2%3A1505392771%3A4035%3A6192; fr=0bjlZrd4hpXNhJ5bE.AWVb-vmas8C0u6jgZCwUPqDviE4.BZulQb.Rp.FqD.0.0.BaiKRh.AWVI_VLP; wd=1366x672; act=1518905949707%2F7; presence=EDvF3EtimeF1518905952EuserFA21B03547953606A2EstateFDutF1518905952273CEchFDp_5f1B03547953606F12CC';
+    var __dyn = '265817011212249537751559795586581721109985728473994950';
+    var fb_dtsg = 'AQFpz15M37a_:AQHncUHTIc12';
+    var jazoest = '265817011212249537751559795586581721109985728473994950';
+    var videoId = '1696533503739902';
+    var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36';
+	
+    var urlParameters = 
+            "composer_entry_time=7"+
+            "&composer_session_id=de9f2c9a-8d7e-4bc4-87bd-6c988817e04d"+
+            "&composer_session_duration=2774"+
+            "&composer_source_surface=group"+
+            "&hide_object_attachment=false"+
+            "&num_keystrokes=16"+
+            "&num_pastes=0"+
+            "&privacyx&ref=group"+
+            "&xc_sticker_id=0"+
+            "&target_type=group"+
+            "&xhpc_message="+  encodeURI(message)  +
+            "&xhpc_message_text="+ encodeURI(message)  +
+            "&is_react=true"+
+            "&xhpc_composerid=rc.u_jsonp_4_r"+
+            "&xhpc_targetid=" + groupId +
+            "&xhpc_context=profile"+
+            "&xhpc_timeline=false"+
+            "&xhpc_finch=false"+
+            "&xhpc_aggregated_story_composer=false"+
+            "&xhpc_publish_type=1"+
+            "&xhpc_fundraiser_page=false"+
+            "&__user=" + c_user +
+            "&__a=1"+
+           // "&__dyn="+ __dyn + 
+            "&__req=49"+
+            "&__be=1"+
+            "&__pc=EXP1%3Ahome_page_pkg"+
+            "&__rev=3453879"+
+            "&fb_dtsg="+ fb_dtsg + 
+            "&jazoest="+ jazoest + 
+            "&__spin_r=3453879"+
+            "&__spin_b=trunk"+
+            "&__spin_t=1510641759"+
+            "&attachment[type]=11"+
+            "&attachment[params][0]=" + videoId +
+            "&attachment[reshare_original_post]=false"+
+            "&xc_share_params=[" + videoId + "]" +
+            "&xc_share_target_type=11"
+	    
+    var options = { 
+        hostname: 'www.facebook.com',
+        path: "/ajax/updatestatus.php?av=" + c_user +  "&dpr=1",
+        method: 'POST',
+        headers: {'Cookie': cookie,
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'user-agent' : userAgent
+        }
+    };
+    var request =  https.request(options, (resp) => {
+          var data = '';
+         
+          // A chunk of data has been recieved.
+          resp.on('data', (chunk) => {
+            data += chunk;
+          });
+         
+          // The whole response has been received. Print out the result.
+          resp.on('end', () => {
+           // console.log('end' + data);
+          });
+     
+    }).on("error", (err) => {
+      console.log("Error: " + err.message);
+    });
+  
+  request.write(urlParameters);
+  request.end();
+
+};
+
+//post2GroupVideo()
+var post2GroupVideo1 = function( ){
+    var groupId = '748487905348786';
+    var message = 'test00ssss';
+    var __user =  '100003547953606';
+    var videoId = '781574775386263';
+    var cookie = 'datr=PfgPVtLPN6FahZqftRH08vKi; sb=RMDnV_Cf5qCLsNpFUiFfQ0Xj; c_user=100003547953606; xs=12%3AwoI5UXh_p31PUg%3A2%3A1505392771%3A4035%3A6192; fr=0bjlZrd4hpXNhJ5bE.AWWK_1UVKPhp7z8On58dBk46mVY.BZulQb.Rp.FqD.0.0.BaiLKc.AWU2uTC7; act=1518908224836%2F0; presence=EDvF3EtimeF1518908530EuserFA21B03547953606A2EstateFDutF1518908530306CEchFDp_5f1B03547953606F8CC; wd=675x672'
+    var fb_dtsg = 'AQFIyHt2Nvhf:AQFf3qvhz7KM';
+    var jazoest = '2658170731217211650781181041025865817010251113118104122557577';
+    var userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36'
+    var url = `http://sharefacebook002.openode.io/post2GroupVideo?groupId=${groupId}&message=${message}&c_user=${__user}&cookie=${cookie}&fb_dtsg=${fb_dtsg}&jazoest=${jazoest}&videoId=${videoId}&userAgent=${userAgent}`;
+    
+    var rest = client.get(encodeURI(url), function (data, response) {
+       // callback();      
+    });
+    rest.on('error', function (err) {
+        console.log('[post2GroupVideo] request error', err);
+       // callback(err);
+    });
+}
+
+post2GroupVideo1();

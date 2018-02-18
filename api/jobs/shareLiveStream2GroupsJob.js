@@ -45,6 +45,7 @@ var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,
                         account  = finn;
                         console.log('[shareLiveStream2GroupsJob] post2GroupVideo: ', account.username);
                         console.log('[shareLiveStream2GroupsJob] groupId: ',  item.shareGroupId);
+                        console.log('[shareLiveStream2GroupsJob] videoId: ',  videoId);
                         if(account.openode){
                             ShareDetail.update({id: item.id },{ status : 'Processing' }).exec(function afterwards(err, updated){})
                             post2GroupVideo(videoId, item.shareGroupId, item.messageShare,account, function(err){

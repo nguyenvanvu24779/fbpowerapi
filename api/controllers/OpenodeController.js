@@ -29,7 +29,7 @@ module.exports = {
 	            var rest = client.get("http://" + siteUrl + '/checkip', function (data, response) {
                     // parsed response body as js object 
                     var openode = {siteUrl : siteUrl, detail : data, ip : data.query, status : 'OK'};
-                    AccountsFB.find({openode : null, status : 'OK'}).limit(accountsPerOpenode).exec(function(err, accounts){
+                    AccountsFB.find({openode : null, status: { $in: [ "OK", "ADD_NEW" ] } }).limit(accountsPerOpenode).exec(function(err, accounts){
                        if(err){
                            console.log('[addOpenode] err:', err);
                            return res.json(500, { error: err })

@@ -22,6 +22,9 @@ var genFullInfoFromCooike = function(cookie, openode , callback){
     var url = `http://${openode.siteUrl}/genFullInfoFromCooike?cookie=${cookie}&userAgent=${sails.config.globals.userAgent}`;
     var rest = client.get(encodeURI(url),function (data, response) {
        // console.log(data.data)
+       if(data.err){
+          return callback(null, {fb_dtsg : '', jazoest : ''})
+       }
         if(data.data){
             const buffer = new Buffer(data.data);
             decompress(buffer, function(err, output) {
@@ -98,6 +101,7 @@ var loadFullInfoAccountJob = function(){
                              AccountsFB.update({__user:  account.__user},{ status : 'checkpoint' }).exec(function afterwards(err, updated){});
                         }  else AccountsFB.update({__user:  account.__user},{ fb_dtsg :  fb_dtsg ,jazoest : jazoest, status : 'OK' }).exec(function afterwards(err, updated){});
                     
+                        
                        
                     }
                     console.log('[loadFullInfoAccountJob] username: ' + account.username);
