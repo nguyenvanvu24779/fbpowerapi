@@ -28,10 +28,12 @@
     "querystring": "^0.2.0",
     "rc": "1.0.1",
     "sails": "~0.12.14",
+    "sails-auth": "^2.1.1",
     "sails-disk": "~0.10.9",
     "sails-hook-jobs": "^0.1.6",
     "sails-mongo": "^0.12.2",
-    "sails-pager": "^2.1.0"
+    "sails-pager": "^2.1.0",
+    "sails-permissions": "^2.1.8"
   },
   "scripts": {
     "debug": "node debug app.js",
