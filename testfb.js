@@ -922,9 +922,6 @@ var getCursorViewShare = function ( videoId, account, callback){
     "cookie" : account.cookie
   };
   
-  
-  
-  
    var options = { 
           hostname: 'www.facebook.com',
           path: "/ajax/shares/view?target_fbid="+ videoId+"&av="+ account.__user +"&dpr=1&__asyncDialog=7"
@@ -1042,7 +1039,32 @@ var ResharesPagelet = function (videoId , account ,cursor){
 
 var account = {"__user":"100007412476717","cookie":"datr=WTxPWlGiDrmPUYqGnyzTYZuG;c_user=100007412476717;xs=1:0pKez1U-bF1BTw:2:1515142245:14829:6215;fr=0Bn6yvgYQKtwgqaEK.AWUcMGwp3ZhIj5_PCRxK7vZzISM.BaTzxZ.M8.AAA.0.0.BaTzxl.AWWiUVix;","fb_dtsg":"AQGHmAYd7yRq:AQEOdMZEMp8-","jazoest":"65817172109658910055121821135865816979100779069771125645","username":"100007412476717.zjuktu@mko.nz","password":"ndtdtk1","createdAt":"2018-01-05T08:52:52.128Z","updatedAt":"2018-01-05T08:52:52.128Z","id":"5a4f3ce4d13cf9350145d91f"}
 
-getCursorViewShare('10155526388683253', account,function(err, cursor){
-  if(err) return console.log(err);
-  ResharesPagelet('10155526388683253', account ,cursor);
-});
+//getCursorViewShare('10155526388683253', account,function(err, cursor){
+//  if(err) return console.log(err);
+///  ResharesPagelet('10155526388683253', account ,cursor);
+//});
+
+
+ var fetch = function (value, after ) { 
+    var  url =  "/" + value + "?fields=feed{type,message}";
+      
+    //console.log(url);
+      
+    FB.api(url, function(response){
+        if(response && !response.error){
+            var data = response.feed.data;
+            if(data[0] && data[1]){
+              console.log(data[0]);
+              console.log(data[0].id.substring(data[0].id.length - 16));
+              console.log(data[1]);
+              console.log(data[1].id.substring(data[1].id.length - 16));
+            }
+        } else {
+          console.log(response.error);
+        }
+    });
+}
+FB.setAccessToken('766982643351181|xK29IJKoDrF9zkFcN3uQXzoZcv4');
+        
+fetch('560347107345379');
+

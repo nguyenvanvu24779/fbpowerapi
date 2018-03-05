@@ -2,7 +2,8 @@ var async = require("async");
 const https = require('https');
 var Client = require('node-rest-client').Client;
 var client = new Client();
-
+var FB = require('fb');
+FB.options({version: 'v2.11'});
 
 
 var post2GroupVideo = function(videoId ,groupId, message, account ,callback){
@@ -21,9 +22,89 @@ var post2GroupVideo = function(videoId ,groupId, message, account ,callback){
         callback(err);
     });
 }
+
+var sendLike = function(feedId ,groupId, account ,callback){
+    var __user =  account.__user;
+    var cookie = account.cookie;
+    var fb_dtsg = account.fb_dtsg;
+    var jazoest = account.jazoest;
+    var userAgent = sails.config.globals.userAgent;
+    
+    var url = `http://${account.openode.siteUrl}/sendLike?feedId=${feedId}&groupId=${groupId}&c_user=${__user}&cookie=${cookie}&fb_dtsg=${fb_dtsg}&jazoest=${jazoest}&userAgent=${userAgent}`;
+    
+    var rest = client.get(encodeURI(url), function (data, response) {
+        callback();      
+    });
+    rest.on('error', function (err) {
+        console.log('[sendLike] request error', err);
+        callback(err);
+    });
+}
+
+
+var sendComment = function(feedId , content ,groupId, account ,callback){
+    var __user =  account.__user;
+    var cookie = account.cookie;
+    var fb_dtsg = account.fb_dtsg;
+    var jazoest = account.jazoest;
+    var userAgent = sails.config.globals.userAgent;
+    
+    var url = `http://${account.openode.siteUrl}/sendComment?content=${content}&feedId=${feedId}&groupId=${groupId}&c_user=${__user}&cookie=${cookie}&fb_dtsg=${fb_dtsg}&jazoest=${jazoest}&userAgent=${userAgent}`;
+    
+    var rest = client.get(encodeURI(url), function (data, response) {
+        callback();      
+    });
+    rest.on('error', function (err) {
+        console.log('[sendComment] request error', err);
+        callback(err);
+    });
+}
+
+
+
+var getFeedId = function (token, groupId, callback ) { 
+    var  url =  "/" + groupId + "?fields=feed{type,message}";
+    //console.log(url);
+    FB.api(url, function(response){
+        var arrFeedId = [];
+        if(response && !response.error){
+            var data = response.feed.data;
+            if(data[0] && data[1] && data[2] && data[3]){
+              console.log(data[0]);
+              console.log(data[0].id.substring(data[0].id.length - 16));
+              console.log(data[1]);
+              console.log(data[1].id.substring(data[1].id.length - 16));
+              console.log(data[2]);
+              console.log(data[2].id.substring(data[2].id.length - 16));
+              console.log(data[3]);
+              console.log(data[3].id.substring(data[3].id.length - 16));
+              
+              arrFeedId.push(data[0].id.substring(data[0].id.length - 16));
+              arrFeedId.push(data[1].id.substring(data[1].id.length - 16));
+              arrFeedId.push(data[2].id.substring(data[2].id.length - 16));
+              arrFeedId.push(data[3].id.substring(data[3].id.length - 16));
+              callback(null, arrFeedId);
+            } else callback('FeedId empty') 
+        } else {
+          console.log(response.error);
+          callback(response.error)
+        }
+    });
+}
 var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,callback){
     var shareDetails = [];
+    var token = '';
     async.waterfall([
+        function(callbackWaterfall){
+            Settings.findOne({
+                key : 'access_token'
+            }).exec(function (err, finn){
+                if (!err && finn ) {
+                    token = finn.value;
+                }
+                callbackWaterfall();
+            });
+        },
         function(callbackWaterfall){
              ShareDetail.find({streamvideo : streamVideoId }).exec(function(err, data) {
                 if(err){
@@ -34,6 +115,13 @@ var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,
                 callbackWaterfall();
              });
                
+        },
+        function(callbackWaterfall){
+          if(shareDetails.length > 0) {
+              
+              
+              setTimeout(function(){callbackWaterfall()}, 1000*60*5);
+          }
         },
         function(callbackWaterfall){
             async.eachOfSeries(shareDetails, (item, key, cbEachOfSeries) => {
@@ -48,9 +136,26 @@ var shareLiveStream2GroupsJob = function(videoId, streamVideoId, timeShareLimit,
                         console.log('[shareLiveStream2GroupsJob] videoId: ',  videoId);
                         if(account.openode){
                             ShareDetail.update({id: item.id },{ status : 'Processing' }).exec(function afterwards(err, updated){})
-                            post2GroupVideo(videoId, item.shareGroupId, item.messageShare,account, function(err){
-                                
+                           
+                            getFeedId(token, item.shareGroupId, function(err, data){
+                                async.eachOfSeries(data, (it, k, cbEachOfSeriesFeedId) => {
+                                    if(k % 2 == 0 ){
+                                        sendLike(it, item.shareGroupId, account, function(err){
+                                     
+                                        })
+                                    } else {
+                                        sendComment(it, '...', item.shareGroupId, account, function(err){
+                                         
+                                        })
+                                    }
+                                    setTimeout(function() {cbEachOfSeriesFeedId()}, 15000);
+                                }, err => {})
                             });
+                            setTimeout(function() {
+                                post2GroupVideo(videoId, item.shareGroupId, item.messageShare,account, function(err){
+                                });
+                            }, 1000 * 60 * 5)
+                           
                         }
                     }
                     setTimeout(function(){cbEachOfSeries();}, shareDetails.length > 1 ?  (timeShareLimit*60/shareDetails.length)*1000 : 1000)  ;
