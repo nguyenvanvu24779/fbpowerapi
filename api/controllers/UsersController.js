@@ -7,6 +7,23 @@
  var pager = require('sails-pager');
 
 module.exports = {
+    register : function(req, res){
+        var email = req.body.email;
+        var password = req.body.password;
+        User.register({
+            username: email,
+            email: email,
+            password : password
+        })
+        .then(function (user) {
+            sails.log('created new user', user);
+            res.json(user);
+        })
+        .catch(function (error) {
+            sails.log.error(error);
+            res.json(error);
+        });  
+    },
 	list: function(req, res) {
         var perPage = req.query.per_page;
         var currentPage = req.query.page;
