@@ -18,6 +18,8 @@ module.exports = {
         .then(function (user) {
             sails.log('created new user', user);
             res.json(user);
+            PermissionService.removeUsersFromRole([user.username], 'registered').then(function () {});
+            PermissionService.addUsersToRole(user.username, 'User').then(function () {});
         })
         .catch(function (error) {
             sails.log.error(error);
@@ -40,5 +42,12 @@ module.exports = {
             console.log(err);
         });
     },
+    
+    test : function(req, res){
+        User.find({id : req.session.passport.user}).populate('roles').exec(function(err, user){
+            return res.json(user) 
+        });
+           
+    }
 };
 

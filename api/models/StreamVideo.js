@@ -23,7 +23,10 @@ module.exports = {
     ShareDetail: {
       collection: 'ShareDetail',
       via: 'streamvideo'
-    }
+    },
+    createdBy:{
+      model: 'User'
+    },
 
   }
 };

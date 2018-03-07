@@ -190,12 +190,13 @@ var post2GroupVideo = function(videoId ,groupId, message, account ,callback){
       request.write(urlParameters);
       request.end();
 }
-var shareLiveStream2GroupsJob = function(url, sharesAmount, timeShareLimit , note, callback){
+var shareLiveStream2GroupsJob = function(userId ,url, sharesAmount, timeShareLimit , note, callback){
     var groups = [];
     var accounts = [];
     var sharePerAccount = [1, 3];
     var messages = [];
     var groupMemberRequire = 10000;
+    var user = {};
     async.waterfall([
         function(callbackWaterfall){
                 Settings.findOne({
@@ -246,8 +247,16 @@ var shareLiveStream2GroupsJob = function(url, sharesAmount, timeShareLimit , not
                 callbackWaterfall();
             })
         },
+        
         function(callbackWaterfall){
-            StreamVideo.create({url : url,sharesAmount : sharesAmount, timeShareLimit : timeShareLimit, status : 'Init' , note : note}).exec(function createCB(err, created){
+            User.find({id : userId}).populate('roles').exec(function(err, users){
+                if(err|| users[0]) return callbackWaterfall(err);
+                user = users[0];
+                callbackWaterfall();
+            });
+        },
+        function(callbackWaterfall){
+            StreamVideo.create({url : url,sharesAmount : sharesAmount, timeShareLimit : timeShareLimit, status : 'Init' , note : note, createdBy : user.id}).exec(function createCB(err, created){
                 if(err)
                     return callbackWaterfall(err);
                 else callbackWaterfall(null, created.id);
@@ -300,7 +309,7 @@ module.exports = {
         var timeShareLimit = req.query.timeShareLimit;
         var note = req.query.note;
         var url = req.query.url;
-        shareLiveStream2GroupsJob(url, sharesAmount, timeShareLimit, note,  function(err){
+        shareLiveStream2GroupsJob(req.session.passport.user,url, sharesAmount, timeShareLimit, note,  function(err){
             if(err){
                 res.json(500, { error: err })
                 sails.sockets.broadcast('root', {alert : "ERROR, " + err});
@@ -325,13 +334,41 @@ module.exports = {
         if(sortBy == null || sortBy == undefined){
             sortBy = 'createdAt';
         }
-        var conditions = {active: true};
- 
-        //Using Promises 
-        pager.paginate(StreamVideo, {}, currentPage, perPage, ['ShareDetail'], sortBy + ' DESC').then(function(records){
-            res.json(records);
-        }).catch(function(err) {
-            console.log(err);
+        
+        var userId = req.session.passport.user;
+        var conditions = {createdBy : userId};
+        async.waterfall([
+            function(cb){
+                User.find({id : userId}).populate('roles').exec(function(err, users){
+                    if(err || users[0]==undefined){
+                        return cb(err);
+                    } 
+                    //console.log(u);
+                    var found = users[0].roles.find(function(element) {
+                      return element.name == 'admin';
+                    });
+                    if(found != undefined){
+                        conditions = {};
+                    }
+                    cb();
+                });
+            },
+            function(cb){
+                //Using Promises 
+                pager.paginate(StreamVideo, conditions, currentPage, perPage, ['ShareDetail'], sortBy + ' DESC').then(function(records){
+                    res.json(records);
+                    cb()
+                }).catch(function(err) {
+                    cb(err)
+                });
+               
+            }
+        ], err => {
+            if(err){
+                console.log(err);
+                res.json(err);
+            }
+            
         });
     },
 	

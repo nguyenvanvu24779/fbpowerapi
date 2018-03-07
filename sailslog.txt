@@ -1,0 +1,80 @@
+
+[32minfo: [39mStarting app...
+
+[33mwarn: [39msails.getBaseUrl() is deprecated and will be removed in Sails v1.0.  See http://sailsjs.org/documentation/reference/application/sails-getbaseurl for more info.
+-----------------------------------------------------------------
+
+ Excuse my interruption, but it looks like this app
+ does not have a project-wide "migrate" setting configured yet.
+ (perhaps this is the first time you're lifting it with models?)
+ 
+ In short, this setting controls whether/how Sails will attempt to automatically
+ rebuild the tables/collections/sets/etc. in your database schema.
+ You can read more about the "migrate" setting here:
+ http://sailsjs.org/#!/documentation/concepts/ORM/model-settings.html?q=migrate
+
+ In a production environment (NODE_ENV==="production") Sails always uses
+ migrate:"safe" to protect inadvertent deletion of your data.
+ However during development, you have a few other options for convenience:
+
+ 1. safe  - never auto-migrate my database(s). I will do it myself (by hand) 
+ 2. alter - auto-migrate, but attempt to keep my existing data (experimental)
+ 3. drop  - wipe/drop ALL my data and rebuild models every time I lift Sails
+
+What would you like Sails to do?
+
+[32minfo: [39mTo skip this prompt in the future, set `sails.config.models.migrate`.
+[32minfo: [39mUsually this is done in a config file (e.g. `config/models.js`),
+[32minfo: [39mor as an override (e.g. `sails lift --models.migrate='alter').
+
+[33mwarn: [39m** DO NOT CHOOSE "2" or "3" IF YOU ARE WORKING WITH PRODUCTION DATA **
+
+prompt: [90m?[39m[90m: [39m 
+ Temporarily using `sails.config.models.migrate="safe"...
+ (press CTRL+C to cancel-- continuing lift automatically in 0.5 seconds...)
+
+[32minfo: [39m
+[32minfo: [39m               .-..-.
+[32minfo: [39m
+[32minfo: [39m   Sails              <|    .-..-.
+[32minfo: [39m   v0.12.14            |\
+[32minfo: [39m                      /|.\
+[32minfo: [39m                     / || \
+[32minfo: [39m                   ,'  |'  \
+[32minfo: [39m                .-'.-==|/_--'
+[32minfo: [39m                `--'-------' 
+[32minfo: [39m   __---___--___---___--___---___--___
+[32minfo: [39m ____---___--___---___--___---___--___-__
+[32minfo: [39m
+[32minfo: [39mServer lifted in `/root/dev/fbpowerapi`
+[32minfo: [39mTo see your app, visit http://localhost:1337
+[32minfo: [39mTo shut down Sails, press <CTRL> + C at any time.
+[37m[39m
+[37m[39m
+[32minfo: [39muser { createdBy: '5a8af4d8e980e33d29ace02b',
+  owner: '5a8af4d8e980e33d29ace02b',
+  username: 'admin',
+  email: 'admin@example.com',
+  model: '5a8af4d8e980e33d29ace015',
+  createdAt: '2018-02-19T16:01:28.575Z',
+  updatedAt: '2018-03-07T05:53:59.409Z',
+  id: '5a8af4d8e980e33d29ace02b' } authenticated successfully
+[ { roles: 
+   [ { name: 'registered',
+       active: true,
+       createdAt: '2018-02-19T16:01:28.537Z',
+       updatedAt: '2018-03-07T04:12:55.871Z',
+       id: '5a8af4d8e980e33d29ace029' },
+     { name: 'admin',
+       active: true,
+       createdAt: '2018-02-19T16:01:28.542Z',
+       updatedAt: '2018-02-19T16:01:28.542Z',
+       id: '5a8af4d8e980e33d29ace02a' } ],
+  createdBy: '5a8af4d8e980e33d29ace02b',
+  owner: '5a8af4d8e980e33d29ace02b',
+  username: 'admin',
+  email: 'admin@example.com',
+  model: '5a8af4d8e980e33d29ace015',
+  createdAt: '2018-02-19T16:01:28.575Z',
+  updatedAt: '2018-03-07T05:53:59.409Z',
+  id: '5a8af4d8e980e33d29ace02b' } ]
